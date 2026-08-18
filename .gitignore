@@ -1,0 +1,29 @@
+# Environnement
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Data (jamais versionnée)
+data/raw_local/
+data/sample/*.csv
+data/sample/*.parquet
+!data/sample/.gitkeep
+
+# Modèles et artefacts
+models/*.pkl
+models/*.joblib
+mlruns/
+mlflow.db
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Docker
+*.log
