@@ -60,12 +60,12 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 - [x] Formulation prudente dans la doc — `docs/pricing.md` (R² médian 0,12 explicitement signalé, uplift jamais présenté comme un gain réel)
 
 **Jalon 7 — Recommendation**
-- [ ] Baseline Most Popular
-- [ ] Content-based (category/brand/description)
-- [ ] Collaborative filtering (view/add_to_cart/purchase)
-- [ ] Hybrid (combinaison des scores)
-- [ ] Split temporel train/test sur les interactions
-- [ ] Métriques Precision@K / Recall@K / MAP@K
+- [x] Baseline Most Popular
+- [x] Content-based (catégorie RetailRocket `item_properties`, seul attribut produit disponible côté comportemental — voir `docs/recommendation.md`)
+- [x] Collaborative filtering (view/add_to_cart/purchase — TruncatedSVD + FAISS)
+- [x] Hybrid (Reciprocal Rank Fusion content-based + collaborative)
+- [x] Split temporel train/test sur les interactions (coupure globale, testé)
+- [x] Métriques Precision@K / Recall@K / MAP@K (les 3 approches battent la baseline ; espace d'identifiants RetailRocket, pas UCI — voir `docs/recommendation.md` et `docs/api.md`)
 
 ## J4 — Samedi 22/08 — Jalon 8 (API) + Jalon 9 (Dashboard) + Jalon 10 (Intégration)
 

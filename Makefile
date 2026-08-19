@@ -29,7 +29,7 @@ pricing:
 	python3 -m src.pricing.train
 
 recommend:
-	python3 src/recommendation/train.py
+	python3 -m src.recommendation.train
 
 api:
 	uvicorn api.main:app --reload --host 0.0.0.0 --port 8000

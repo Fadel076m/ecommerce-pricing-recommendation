@@ -17,6 +17,7 @@ project: ecommerce-pricing-recommendation
 | BDR-008 | 2026-08-19 | Lecture R2 en DuckDB via secret `TYPE s3` générique (endpoint explicite), pas `TYPE r2` | actif |
 | BDR-009 | 2026-08-19 | Forecasting : comparaison Baseline/Prophet sur la demande agrégée + LightGBM global par produit (pas un Prophet par produit) | actif |
 | BDR-010 | 2026-08-19 | Pricing : élasticité estimée seulement si éligible (1057/4631 produits), fallback assumé -1,5 sinon, bornée à [-10,0] | actif |
+| BDR-011 | 2026-08-19 | Recommendation construite entièrement dans l'espace RetailRocket (visitor_id/item_id), pas UCI customer_id | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -97,3 +98,11 @@ project: ecommerce-pricing-recommendation
 **Pourquoi** : un audit SQL préalable a montré que la grande majorité du catalogue UCI n'a quasiment aucune variation de prix historique — une régression y serait du pur bruit. Sur les produits éligibles eux-mêmes, le R² médian mesuré est très faible (0,12) et quelques régressions sortent des coefficients positifs par artefact statistique (bien "normal" attendu à élasticité négative) — sans bornage, cela inverserait le sens de la recommandation de prix pour ces produits.
 **Alternatives considérées** : régression pooled avec effets fixes produit/catégorie (rejeté — plus robuste en théorie mais complexité et temps disproportionnés pour un R² qui resterait probablement faible faute de vraie variation exogène de prix) ; ne pas fixer de bornes (rejeté après avoir constaté des élasticités positives en sortie de régression brute).
 **Statut** : actif. Le R² médian faible (0,12) et le fallback à 77 % du catalogue sont documentés en clair dans `docs/pricing.md`, jamais présentés comme des résultats fiables sans réserve.
+
+## BDR-011 — Recommendation dans l'espace RetailRocket, pas UCI
+
+**Date** : 2026-08-19
+**Décision** : construire tout le moteur de recommandation (baseline, content-based, collaborative, hybride) dans l'espace d'identifiants RetailRocket (`visitor_id`/`item_id`), et documenter que `/recommendations/{customer_id}` (Jalon 8) doit être compris comme prenant un `visitor_id` RetailRocket, pas un `customer_id` UCI.
+**Pourquoi** : le signal comportemental explicitement demandé par la roadmap Jalon 7 (view/add_to_cart/purchase) n'existe que dans RetailRocket — UCI Online Retail II n'a que des transactions complétées, pas de navigation. Fusionner artificiellement les deux espaces d'identifiants (ex. mapper un `customer_id` UCI vers un `visitor_id` RetailRocket au hasard) violerait la règle explicite du brief sur le mélange de sources hétérogènes (AGENTS.md §3) et produirait des recommandations sans aucune base réelle.
+**Alternatives considérées** : construire un moteur de recommandation "purchase-only" dans l'espace UCI (customer_id/product_id, en utilisant les achats comme seul signal implicite) pour coller à l'API telle que rédigée (rejeté — perd tout le signal view/add_to_cart explicitement demandé par la roadmap, et le catalogue UCI n'a pas d'attributs produits assez riches pour un vrai content-based) ; inventer un mapping customer_id<->visitor_id (rejeté — fabriquerait une fausse donnée, contraire à AGENTS.md).
+**Statut** : actif. Limite structurelle documentée dans `docs/recommendation.md` et `docs/api.md`, à rappeler explicitement dans le rapport final et la démo (Jalon 11/12) pour ne jamais laisser croire que les deux customer_id se recoupent.

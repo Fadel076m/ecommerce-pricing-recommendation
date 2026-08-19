@@ -16,6 +16,8 @@ project: ecommerce-pricing-recommendation
 | LRN-007 | 2026-08-19 | Le `transactionid` RetailRocket n'est pas unique par ligne d'événement : plusieurs items d'un même panier le partagent |
 | LRN-008 | 2026-08-19 | MLflow imprime des emojis sur stdout qui font planter tout script Python sur console Windows (cp1252) — même après un run réussi |
 | LRN-009 | 2026-08-19 | Un prix à 0 (article offert) casse une régression log-log (log(0) indéfini) — filtrer les prix strictement positifs en amont |
+| LRN-010 | 2026-08-19 | Un content-based qui ne score que les items déjà interagis perd son intérêt principal (recommander du cold-start) |
+| LRN-011 | 2026-08-19 | Évaluer des métriques sur un dict `relevant` plus large que l'échantillon réellement recommandé dilue silencieusement les scores vers 0 |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -79,3 +81,17 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : `fact_sales.unit_price` peut valoir exactement 0 (article offert / remise à 100 %, valide selon `docs/data_quality.md` qui n'exige que `unit_price >= 0`). Une régression log-log (`np.polyfit` sur `log(prix)`) plante alors avec `numpy.linalg.LinAlgError: SVD did not converge`, précédé de `RuntimeWarning: divide by zero encountered in log` — le message ne pointe pas directement vers la cause (une seule ligne à prix 0 suffit à casser tout le fit).
 **Contexte** : estimation de l'élasticité prix-demande (Jalon 6, `src/pricing/elasticity.py`).
 **Application future** : avant tout calcul en log sur une colonne prix/quantité qui peut légitimement contenir des zéros (remise à 100 %, article offert), filtrer les valeurs strictement positives en amont plutôt que de découvrir le crash à l'exécution sur données réelles — les tests unitaires sur données synthétiques ne le révèlent pas si elles ne couvrent pas ce cas limite.
+
+## LRN-010 — Content-based limité aux items déjà interagis = perd son intérêt
+
+**Date** : 2026-08-19
+**Pattern observé** : une première version de `build_category_item_popularity` (recommendation, Jalon 7) faisait un `merge(train_interactions, item_categories, how="inner")` — ne gardant que les items ayant déjà des interactions. Un test synthétique volontairement construit avec un item catalogué mais jamais interagi (`I4`) a révélé qu'il ne pouvait jamais être recommandé, alors que c'est exactement le cas d'usage où le content-based devrait surpasser le collaborative filtering (cold-start item).
+**Contexte** : `src/recommendation/content_based.py`, détecté par `tests/test_recommendation.py::test_recommend_content_based_favors_visitor_top_category`.
+**Application future** : pour un module content-based, toujours partir du catalogue complet des items avec attributs connus (pas seulement ceux déjà interagis) et attribuer un score de base non nul aux items sans historique — sinon le module dégénère en une simple popularité par catégorie, sans aucun avantage sur le cold-start par rapport à la baseline. Un test avec un item délibérément sans interaction est un bon moyen de vérifier cette propriété.
+
+## LRN-011 — Évaluer sur un `relevant` plus large que l'échantillon recommandé dilue les métriques
+
+**Date** : 2026-08-19
+**Pattern observé** : dans `src/recommendation/train.py`, un échantillon de 5000 visiteurs était utilisé pour générer les recommandations (`baseline_recs`, `content_recs`, ...), mais la fonction d'évaluation recevait `test_relevant` complet (22211 visiteurs). Pour les ~17000 visiteurs absents des dicts de recommandations, `.get(visitor_id, [])` renvoyait une liste vide, comptée comme précision/rappel = 0 dans la moyenne — les métriques rapportées (~0,0002-0,0004) étaient near 5x plus basses que la réalité (~0,001-0,006 après correction), sans qu'aucune erreur ne se déclenche.
+**Contexte** : premier run du pipeline recommendation (Jalon 7) — l'incohérence n'a été repérée qu'en comparant `n_visitors_evaluated` (22211) au nombre de visiteurs réellement échantillonnés (5000) dans les logs.
+**Application future** : quand une évaluation tourne sur un sous-échantillon (scoping pour tenir le temps imparti), toujours restreindre explicitement le dict "vérité terrain" au même sous-échantillon avant de calculer les métriques — et vérifier que `n_visitors_evaluated` (ou équivalent) dans la sortie correspond bien à la taille de l'échantillon voulu, pas à une population plus large silencieusement réintroduite.
