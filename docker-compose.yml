@@ -29,6 +29,16 @@ services:
     container_name: ecommerce_api
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Dans le réseau docker-compose, les services se joignent par leur nom,
+      # pas par localhost (surcharge les valeurs de .env prévues pour un usage
+      # local hors conteneur).
+      POSTGRES_HOST: postgres
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      # Artefacts entraînés localement (make forecast/pricing/recommend, non
+      # versionnés) : montés en lecture seule, pas rebuild d'image à chaque run.
+      - ./models:/app/models:ro
     ports:
       - "8000:8000"
     depends_on:

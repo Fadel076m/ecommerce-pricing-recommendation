@@ -12,6 +12,7 @@ psycopg2-binary>=2.9
 # alternative explicite §2 ; son import déclenche un sys.exit() silencieux
 # quand une dépendance optionnelle grpc/protobuf manque — cf. .claude/memory/learnings.md)
 pytest>=8.0
+httpx>=0.27        # requis par fastapi.testclient.TestClient
 
 # Data science
 scikit-learn>=1.4

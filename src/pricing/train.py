@@ -53,6 +53,11 @@ def build_pricing_table(engine) -> pd.DataFrame:
         result["product_id"] = row["product_id"]
         result["is_estimated"] = row["is_estimated"]
         result["r_squared"] = row["r_squared"]
+        # Nécessaires pour POST /pricing/simulate (Jalon 8) : reconstruire la
+        # courbe de demande sur une grille de prix personnalisée sans requêter
+        # à nouveau la base à chaque appel.
+        result["cost_price"] = row["cost_price"]
+        result["avg_daily_demand"] = row["avg_daily_demand"]
         rows.append(result)
 
     return pd.DataFrame(rows)

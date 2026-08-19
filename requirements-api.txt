@@ -1,0 +1,17 @@
+# Dépendances runtime de l'API FastAPI uniquement (docker/Dockerfile.api).
+# Sous-ensemble de requirements.txt : l'API sert des artefacts déjà entraînés
+# (models/*.parquet, *.txt) et ne réentraîne rien, donc pas besoin de
+# pyspark/prophet/scikit-learn/faiss/duckdb/boto3/dash/mlflow ici — installer
+# l'image complète faisait échouer le build (timeout réseau sur un gros
+# téléchargement, cf. .claude/memory/learnings.md) et grossissait l'image
+# pour rien.
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pandas>=2.2
+numpy
+pyarrow>=16.0
+lightgbm>=4.3
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+python-dotenv>=1.0

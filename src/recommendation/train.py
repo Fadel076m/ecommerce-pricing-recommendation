@@ -112,6 +112,19 @@ def main():
     category_popularity.to_parquet(MODELS_DIR / "recommendation_category_popularity.parquet", index=False)
     np.save(MODELS_DIR / "recommendation_item_embeddings.npy", item_embeddings)
     pd.DataFrame({"item_id": list(item_index)}).to_parquet(MODELS_DIR / "recommendation_item_index.parquet", index=False)
+
+    # Table de correspondance visitor_id -> recommandations hybrides précalculées,
+    # pour servir l'API (Jalon 8) sans recalculer un SVD/FAISS à chaque requête.
+    # Portée volontairement limitée à l'échantillon évalué ci-dessus (cohérence
+    # avec les métriques rapportées) ; tout visitor_id hors de cette table retombe
+    # sur la baseline Most Popular côté API (cf. docs/api.md).
+    lookup_rows = [
+        {"visitor_id": visitor_id, "recommended_items": hybrid_recs[visitor_id]}
+        for visitor_id in eval_visitors
+        if hybrid_recs[visitor_id]
+    ]
+    pd.DataFrame(lookup_rows).to_parquet(MODELS_DIR / "recommendation_visitor_lookup.parquet", index=False)
+
     print(f"Artefacts sauvegardés dans {MODELS_DIR} (non versionnés).")
 
 

@@ -18,6 +18,9 @@ project: ecommerce-pricing-recommendation
 | LRN-009 | 2026-08-19 | Un prix à 0 (article offert) casse une régression log-log (log(0) indéfini) — filtrer les prix strictement positifs en amont |
 | LRN-010 | 2026-08-19 | Un content-based qui ne score que les items déjà interagis perd son intérêt principal (recommander du cold-start) |
 | LRN-011 | 2026-08-19 | Évaluer des métriques sur un dict `relevant` plus large que l'échantillon réellement recommandé dilue silencieusement les scores vers 0 |
+| LRN-012 | 2026-08-19 | L'encodage catégoriel LightGBM dépend de l'ordre exact des catégories vues à l'entraînement — à persister et réutiliser tel quel à l'inférence |
+| LRN-013 | 2026-08-19 | `lightgbm` a besoin de `libgomp1` (OpenMP) au runtime, absent de `python:3.11-slim` |
+| LRN-014 | 2026-08-19 | Un `pip install` dans un build Docker peut timeout sur un réseau instable même avec peu de paquets — `--timeout`/`--retries` généreux évite un échec évitable |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -95,3 +98,24 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : dans `src/recommendation/train.py`, un échantillon de 5000 visiteurs était utilisé pour générer les recommandations (`baseline_recs`, `content_recs`, ...), mais la fonction d'évaluation recevait `test_relevant` complet (22211 visiteurs). Pour les ~17000 visiteurs absents des dicts de recommandations, `.get(visitor_id, [])` renvoyait une liste vide, comptée comme précision/rappel = 0 dans la moyenne — les métriques rapportées (~0,0002-0,0004) étaient near 5x plus basses que la réalité (~0,001-0,006 après correction), sans qu'aucune erreur ne se déclenche.
 **Contexte** : premier run du pipeline recommendation (Jalon 7) — l'incohérence n'a été repérée qu'en comparant `n_visitors_evaluated` (22211) au nombre de visiteurs réellement échantillonnés (5000) dans les logs.
 **Application future** : quand une évaluation tourne sur un sous-échantillon (scoping pour tenir le temps imparti), toujours restreindre explicitement le dict "vérité terrain" au même sous-échantillon avant de calculer les métriques — et vérifier que `n_visitors_evaluated` (ou équivalent) dans la sortie correspond bien à la taille de l'échantillon voulu, pas à une population plus large silencieusement réintroduite.
+
+## LRN-012 — L'encodage catégoriel LightGBM doit être persisté et réutilisé à l'identique
+
+**Date** : 2026-08-19
+**Pattern observé** : LightGBM encode une feature `categorical_feature` en codes entiers internes dérivés de l'ordre des catégories vues à l'entraînement (`pd.Categorical.cat.categories`). Si l'inférence reconstruit ce `Categorical` avec un ordre différent (ex. recalculé à partir d'une autre requête SQL, ou d'un sous-ensemble), les codes ne correspondent plus aux mêmes produits — le modèle donnerait des prédictions silencieusement fausses, sans aucune erreur.
+**Contexte** : préparation de l'inférence forecasting pour l'API (Jalon 8, `src/forecasting/predict.py`) — repéré avant que le bug ne se produise, en réfléchissant à la reconstruction du `Categorical` côté service.
+**Application future** : pour tout modèle avec une feature catégorielle (LightGBM, CatBoost, etc.), persister la liste ORDONNÉE exacte des catégories utilisées à l'entraînement (ex. `.parquet` dédié) et la charger telle quelle à l'inférence — ne jamais la recalculer indépendamment, même si le contenu semble identique.
+
+## LRN-013 — `lightgbm` nécessite `libgomp1` sur une image Docker slim
+
+**Date** : 2026-08-19
+**Pattern observé** : le conteneur API plantait au démarrage avec `OSError: libgomp.so.1: cannot open shared object file: No such file or directory` en important `lightgbm`, alors que l'installation pip s'était bien déroulée. `python:3.11-slim` (Debian minimal) n'inclut pas la bibliothèque runtime OpenMP (`libgomp1`) dont dépend l'extension C++ de LightGBM.
+**Contexte** : premier lancement du conteneur `ecommerce_api` (Jalon 8).
+**Application future** : toute image Docker slim/Debian qui importe `lightgbm` (ou d'autres libs C++ compilées avec OpenMP) doit installer `libgomp1` via `apt-get install` avant l'étape `pip install` — l'erreur n'apparaît qu'au runtime (import), jamais au moment du build pip.
+
+## LRN-014 — `pip install` peut timeout dans un build Docker même avec peu de paquets
+
+**Date** : 2026-08-19
+**Pattern observé** : `pip install -r requirements-api.txt` (une dizaine de paquets légers) a échoué deux fois de suite avec `ReadTimeoutError` sur `files.pythonhosted.org`, avant de réussir à la troisième tentative — indépendamment de la taille des paquets, donc pas un problème de gros téléchargement (contrairement à LRN précédents sur pyspark/prophet) mais de latence/instabilité réseau ponctuelle du poste vers PyPI depuis le contexte Docker build.
+**Contexte** : build de l'image `ecommerce_api` (Jalon 8).
+**Application future** : ajouter systématiquement `--timeout 100 --retries 10` (ou équivalent) à tout `pip install` dans un Dockerfile, même pour une liste de dépendances courte — ça ne coûte rien en cas de réseau stable et évite un échec de build entièrement transitoire.

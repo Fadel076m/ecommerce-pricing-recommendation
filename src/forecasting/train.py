@@ -102,10 +102,23 @@ def run_lightgbm_global(engine, mlflow_experiment: str):
         mlflow.log_metrics(metrics)
         print("LightGBM (global, one-step-ahead) :", metrics)
 
+        # Modèle de production (Jalon 8) : ré-entraîné sur l'intégralité des
+        # données disponibles (train+test), pas seulement le train d'évaluation —
+        # pratique standard une fois la performance validée sur le holdout
+        # ci-dessus. Les catégories product_id sont persistées car l'encodage
+        # catégoriel LightGBM dépend de leur ordre exact à l'entraînement.
+        features_df["product_id"] = features_df["product_id"].astype("category")
+        final_model = build_lightgbm_regressor()
+        final_model.fit(features_df[FEATURE_COLUMNS], features_df["y"], categorical_feature=["product_id"])
+
         MODELS_DIR.mkdir(exist_ok=True)
         model_path = MODELS_DIR / "forecasting_lightgbm_global.txt"
-        model.booster_.save_model(str(model_path))
+        final_model.booster_.save_model(str(model_path))
         mlflow.log_artifact(str(model_path))
+
+        known_products_path = MODELS_DIR / "forecasting_known_products.parquet"
+        pd.DataFrame({"product_id": list(features_df["product_id"].cat.categories)}).to_parquet(known_products_path, index=False)
+        mlflow.log_artifact(str(known_products_path))
 
     return metrics
 

@@ -18,6 +18,7 @@ project: ecommerce-pricing-recommendation
 | BDR-009 | 2026-08-19 | Forecasting : comparaison Baseline/Prophet sur la demande agrégée + LightGBM global par produit (pas un Prophet par produit) | actif |
 | BDR-010 | 2026-08-19 | Pricing : élasticité estimée seulement si éligible (1057/4631 produits), fallback assumé -1,5 sinon, bornée à [-10,0] | actif |
 | BDR-011 | 2026-08-19 | Recommendation construite entièrement dans l'espace RetailRocket (visitor_id/item_id), pas UCI customer_id | actif |
+| BDR-012 | 2026-08-19 | API servie depuis des artefacts précalculés (Jalons 5-7), `requirements-api.txt` allégé pour le Dockerfile | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -106,3 +107,11 @@ project: ecommerce-pricing-recommendation
 **Pourquoi** : le signal comportemental explicitement demandé par la roadmap Jalon 7 (view/add_to_cart/purchase) n'existe que dans RetailRocket — UCI Online Retail II n'a que des transactions complétées, pas de navigation. Fusionner artificiellement les deux espaces d'identifiants (ex. mapper un `customer_id` UCI vers un `visitor_id` RetailRocket au hasard) violerait la règle explicite du brief sur le mélange de sources hétérogènes (AGENTS.md §3) et produirait des recommandations sans aucune base réelle.
 **Alternatives considérées** : construire un moteur de recommandation "purchase-only" dans l'espace UCI (customer_id/product_id, en utilisant les achats comme seul signal implicite) pour coller à l'API telle que rédigée (rejeté — perd tout le signal view/add_to_cart explicitement demandé par la roadmap, et le catalogue UCI n'a pas d'attributs produits assez riches pour un vrai content-based) ; inventer un mapping customer_id<->visitor_id (rejeté — fabriquerait une fausse donnée, contraire à AGENTS.md).
 **Statut** : actif. Limite structurelle documentée dans `docs/recommendation.md` et `docs/api.md`, à rappeler explicitement dans le rapport final et la démo (Jalon 11/12) pour ne jamais laisser croire que les deux customer_id se recoupent.
+
+## BDR-012 — API servie depuis des artefacts précalculés, image Docker allégée
+
+**Date** : 2026-08-19
+**Décision** : l'API FastAPI ne réentraîne jamais rien à la volée — elle lit des artefacts déjà produits par `make forecast`/`pricing`/`recommend` (modèle LightGBM + catégories produit connues, table pricing complète, table de correspondance visitor_id -> recommandations + fallback Most Popular), montés en volume Docker (`./models:/app/models:ro`). Seule exception : `POST /pricing/simulate` recalcule une grille de prix personnalisée à la volée (léger, pas de réentraînement). Le Dockerfile de l'API installe un `requirements-api.txt` dédié (fastapi/uvicorn/pandas/lightgbm/sqlalchemy/psycopg2/pyarrow/dotenv), pas le `requirements.txt` complet du projet.
+**Pourquoi** : réentraîner à chaque requête serait beaucoup trop lent (le pipeline recommendation prend plusieurs minutes) ; installer `requirements.txt` complet dans l'image API (pyspark/prophet/dash/scikit-learn/faiss/duckdb/boto3, dont l'API n'a besoin d'aucun) faisait échouer le build sur un timeout réseau et aurait produit une image inutilement lourde.
+**Alternatives considérées** : servir les modèles via MLflow Model Registry en le requêtant à chaque appel (rejeté — complexité et latence disproportionnées pour un prototype académique) ; réentraîner en tâche de fond planifiée (rejeté — hors périmètre du temps disponible, Airflow déjà sacrifié en priorité, BDR-004).
+**Statut** : actif. Conséquence directe : les recommandations ne couvrent que les visiteurs de l'échantillon évalué au Jalon 7 (5000/81318) — les autres retombent sur la baseline Most Popular côté API, documenté dans `docs/recommendation.md`/`docs/api.md`.

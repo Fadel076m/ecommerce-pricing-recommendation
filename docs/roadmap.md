@@ -70,9 +70,9 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 ## J4 — Samedi 22/08 — Jalon 8 (API) + Jalon 9 (Dashboard) + Jalon 10 (Intégration)
 
 **Jalon 8 — API FastAPI**
-- [ ] `GET /health`, `GET /forecast/{product_id}`, `GET /pricing/{product_id}`, `GET /recommendations/{customer_id}`, `POST /pricing/simulate`
-- [ ] Swagger/OpenAPI généré automatiquement
-- [ ] Dockerfile API
+- [x] `GET /health`, `GET /forecast/{product_id}`, `GET /pricing/{product_id}`, `GET /recommendations/{customer_id}`, `POST /pricing/simulate` — testés en direct (curl) et via Pytest (`tests/test_api.py`, 9 tests)
+- [x] Swagger/OpenAPI généré automatiquement (`/docs`, `/openapi.json` vérifiés HTTP 200)
+- [x] Dockerfile API — `requirements-api.txt` allégé (pas de pyspark/prophet/dash inutiles), build + run vérifiés de bout en bout via `docker compose up api` (réseau, Postgres, volume `models/`)
 
 **Jalon 9 — Dashboard Dash**
 - [ ] Page Executive (KPIs globaux)
