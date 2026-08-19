@@ -24,6 +24,7 @@ project: ecommerce-pricing-recommendation
 | LRN-015 | 2026-08-19 | Un serveur local et un conteneur Docker peuvent se disputer le même port sans erreur visible — vérifier `docker compose ps` avant de suspecter le code |
 | LRN-016 | 2026-08-19 | `python script.py` (au lieu de `python -m package.module`) casse les imports absolus `from package...` dans un Dockerfile CMD |
 | LRN-017 | 2026-08-19 | Le texte visible du dashboard ne doit jamais citer les fichiers de doc interne ni mentionner "projet académique" — retour utilisateur après le premier jet |
+| LRN-018 | 2026-08-19 | Le stub `.github/workflows/ci.yml` initial ne se déclenchait que sur `main`, jamais utilisé (le repo n'a que `master`) — vérifier toujours le nom de branche réel avant de faire confiance à un stub de CI |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -143,3 +144,10 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : la première version des pages du dashboard (bannières de disclaimer notamment) citait directement des chemins de fichiers internes ("cf. docs/data_dictionary.md", "seed=42", "AGENTS.md §4") et mentionnait explicitement "prototype académique" dans le pied de page — approprié pour la documentation technique (`docs/*.md`), mais pas pour une interface destinée à être montrée comme un produit. L'utilisateur a demandé un design "digne de ce nom", inspiré de dashboards SaaS réels (sidebar, cartes colorées, icônes), et l'a explicitement signalé.
 **Contexte** : refonte visuelle du dashboard (Jalon 9, après le premier jet).
 **Application future** : dans tout composant destiné à l'affichage utilisateur final (dashboard, futurs écrans front), garder les avertissements de prudence métier en langage naturel généraliste ("estimation basée sur l'historique", "sensibilité au prix mesurée sur cet historique") sans jamais nommer un fichier de doc, une règle interne (AGENTS.md, seed=42) ni le statut "académique/prototype" du projet — ces réserves techniques restent dans `docs/*.md` et `.claude/memory/`, jamais dans l'UI. Le design doit être traité comme un livrable produit à part entière, pas une simple démonstration fonctionnelle.
+
+## LRN-018 — Vérifier le nom de branche réel avant de faire confiance à un stub de CI
+
+**Date** : 2026-08-19
+**Pattern observé** : le stub `.github/workflows/ci.yml` généré au setup initial (18/08) déclenchait sur `push`/`pull_request` vers `branches: [main]`. Le repo n'a jamais eu que la branche `master` (confirmé via `git branch -a` et `git remote show origin` : `HEAD branch: master`) — ce workflow n'a donc **jamais tourné**, silencieusement, sur aucun des 9 commits poussés dans la journée.
+**Contexte** : Jalon 10 (Intégration), en voulant vérifier que la CI passait — elle n'avait simplement jamais été déclenchée.
+**Application future** : après avoir créé ou hérité d'un fichier `.github/workflows/*.yml`, toujours vérifier `git branch -a`/`git remote show origin` pour connaître le nom de branche par défaut réel du repo, et s'assurer que les triggers `branches:` le couvrent — ne jamais supposer `main` par défaut. Un stub de CI qui ne s'est jamais déclenché ne produit aucune erreur visible : il faut le vérifier activement (onglet Actions du repo, ou revue du trigger), pas seulement constater qu'il existe.

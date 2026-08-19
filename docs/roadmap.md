@@ -80,11 +80,11 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 - [x] Connexion à l'API (pas de logique métier dupliquée dans le dashboard) — vérifié de bout en bout via `docker compose up dashboard` (réseau dashboard -> api -> Postgres), palette dataviz appliquée (skill dataviz)
 
 **Jalon 10 — Intégration**
-- [ ] Chaîne complète R2 → PostgreSQL → ML → MLflow → FastAPI → Dash fonctionnelle de bout en bout
-- [ ] Docker Compose complet (API + Dashboard + Postgres + MLflow)
-- [ ] Tests pytest (data quality, API, pricing, recommendation, transformations)
-- [ ] GitHub Actions CI (tests + build)
-- [ ] Kafka et Airflow **seulement si le temps le permet** — ne jamais les prioriser au détriment des 3 modèles ou du dashboard (règle explicite du brief, section 29.8)
+- [x] Chaîne complète R2 → PostgreSQL → ML → MLflow → FastAPI → Dash fonctionnelle de bout en bout — vérifié après `docker compose down && docker compose up -d --build` complet (redémarrage à froid, volumes Postgres persistés)
+- [x] Docker Compose complet (API + Dashboard + Postgres + MLflow) — les 4 services démarrent et communiquent correctement sur le réseau interne
+- [x] Tests pytest (data quality, API, pricing, recommendation, transformations) — 64 tests, dont 35 tournent sans données locales (simulé en écartant temporairement data/raw_local, models/, data/sample/ — 35 passed, 29 skipped proprement, 0 échec)
+- [x] GitHub Actions CI (tests + build) — bug corrigé : le workflow ne se déclenchait que sur `main`, jamais utilisé (le repo n'a que `master`) ; job `build` ajouté (matrice api/dashboard, Dockerfiles allégés Jalon 8/9)
+- [ ] Kafka et Airflow **seulement si le temps le permet** — ne jamais les prioriser au détriment des 3 modèles ou du dashboard (règle explicite du brief, section 29.8) — volontairement non traités, cohérent avec BDR-004
 
 ## J5 — Dimanche 23/08 — Jalon 11 (Documentation) + Jalon 12 (Soutenance) — DEADLINE
 

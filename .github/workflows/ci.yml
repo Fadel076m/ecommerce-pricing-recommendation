@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master, main]
   pull_request:
-    branches: [main]
+    branches: [master, main]
 
 jobs:
   test:
@@ -13,8 +13,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+          cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install --timeout 100 --retries 10 -r requirements.txt
+      # Les sources brutes (data/raw_local/) et les artefacts entraînés (models/)
+      # ne sont pas versionnés (AGENTS.md §6/§3) : les tests d'intégration qui en
+      # dépendent se marquent `skipif` automatiquement et n'échouent pas ici.
+      # Cette étape exécute la partie testable sans données locales : logique de
+      # transformation/évaluation/simulation, et vérifie que tous les modules du
+      # projet s'importent sans erreur (régression de dépendances).
       - name: Run tests
         run: pytest tests/ -v
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, dashboard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.service }} image
+        run: docker build -f docker/Dockerfile.${{ matrix.service }} -t ecommerce-${{ matrix.service }}:ci .
