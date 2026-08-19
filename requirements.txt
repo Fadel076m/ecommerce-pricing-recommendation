@@ -26,8 +26,9 @@ uvicorn[standard]>=0.30
 dash>=2.17
 plotly>=5.22
 
-# Orchestration (optionnel selon jalon 10)
-apache-airflow>=2.9; python_version < "3.13"
+# Orchestration (optionnel selon jalon 10) : voir requirements-airflow.txt,
+# à installer séparément avec le fichier de contraintes officiel (sinon le
+# resolver pip peut rester bloqué indéfiniment sur cet arbre de dépendances).
 
 # Utilitaires
 python-dotenv>=1.0

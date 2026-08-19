@@ -1,0 +1,8 @@
+# Orchestration — optionnelle (Jalon 10, sacrifiable en premier selon AGENTS.md §9 / roadmap).
+# À installer séparément du reste, avec le fichier de contraintes officiel Airflow,
+# car un `pip install apache-airflow` sans contraintes fait tourner le resolver pip
+# indéfiniment (conflits avec fastapi/pydantic/prophet du requirements.txt principal).
+#
+# Exemple (Python 3.11, Airflow 2.9.3) :
+#   pip install "apache-airflow==2.9.3" \
+#     --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.3/constraints-3.11.txt"

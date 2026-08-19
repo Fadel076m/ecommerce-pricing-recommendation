@@ -8,20 +8,20 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 
 **Objectif** : setup technique prêt à coder.
 
-- [ ] Repo initialisé, structure créée, `AGENTS.md`/`CLAUDE.md` en place
-- [ ] `.env` rempli localement (jamais commité)
-- [ ] `docker compose up -d` fonctionnel (Postgres + MLflow)
-- [ ] Environnement Python créé, `requirements.txt` installé
-- [ ] Démarrage Jalon 1 (cadrage) : problématique, objectifs, périmètre MVP rédigés
+- [x] Repo initialisé, structure créée, `AGENTS.md`/`CLAUDE.md` en place
+- [x] `.env` rempli localement (jamais commité)
+- [x] `docker compose up -d` fonctionnel (Postgres + MLflow)
+- [ ] Environnement Python créé, `requirements.txt` installé (Airflow isolé dans `requirements-airflow.txt`, non bloquant — installation en cours)
+- [x] Démarrage Jalon 1 (cadrage) : problématique, objectifs, périmètre MVP rédigés
 
 ## J1 — Mercredi 19/08 — Jalon 1 (Cadrage) + Jalon 2 (Dataset)
 
 **Jalon 1 — Cadrage**
-- [ ] `docs/cahier_des_charges.md` (problématique, objectifs, périmètre, personas, use cases, KPIs)
-- [ ] `docs/business_case.md` (première version)
-- [ ] `docs/rgpd.md`
-- [ ] Risk register minimal (dans le cahier des charges, pas besoin de fichier Excel séparé en solo)
-- [ ] Critère de validation : je peux répondre en une phrase à "quel problème, pour qui, avec quelles données, quelle décision, quel impact ?"
+- [x] `docs/cahier_des_charges.md` (problématique, objectifs, périmètre, personas, use cases, KPIs)
+- [x] `docs/business_case.md` (première version)
+- [x] `docs/rgpd.md`
+- [x] Risk register minimal (dans le cahier des charges, pas besoin de fichier Excel séparé en solo)
+- [x] Critère de validation : je peux répondre en une phrase à "quel problème, pour qui, avec quelles données, quelle décision, quel impact ?"
 
 **Jalon 2 — Dataset**
 - [ ] `docs/data_sources.md` déjà prêt (voir audit fourni), à relire et compléter si besoin
