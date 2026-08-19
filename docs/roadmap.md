@@ -11,7 +11,7 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 - [x] Repo initialisé, structure créée, `AGENTS.md`/`CLAUDE.md` en place
 - [x] `.env` rempli localement (jamais commité)
 - [x] `docker compose up -d` fonctionnel (Postgres + MLflow)
-- [ ] Environnement Python créé, `requirements.txt` installé (Airflow isolé dans `requirements-airflow.txt`, non bloquant — installation en cours)
+- [x] Environnement Python créé, `requirements.txt` installé (venv Python 3.12 — 3.14 écarté, wheels prophet/faiss/lightgbm instables dessus ; Airflow isolé dans `requirements-airflow.txt` ; `great_expectations` retiré, cf. learnings)
 - [x] Démarrage Jalon 1 (cadrage) : problématique, objectifs, périmètre MVP rédigés
 
 ## J1 — Mercredi 19/08 — Jalon 1 (Cadrage) + Jalon 2 (Dataset)
@@ -24,11 +24,11 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 - [x] Critère de validation : je peux répondre en une phrase à "quel problème, pour qui, avec quelles données, quelle décision, quel impact ?"
 
 **Jalon 2 — Dataset**
-- [ ] `docs/data_sources.md` déjà prêt (voir audit fourni), à relire et compléter si besoin
-- [ ] `docs/data_dictionary.md` : une entrée par variable (nom, type, source, signification, transformation, usage)
-- [ ] `scripts/data_generator.py` opérationnel, seed=42, génère cost_price/stock/promotion/discount
-- [ ] Échantillon nettoyé exporté dans `data/sample/`
-- [ ] `docs/data_quality.md` : règles minimales appliquées et testées
+- [x] `docs/data_sources.md` déjà prêt (voir audit fourni), à relire et compléter si besoin
+- [x] `docs/data_dictionary.md` : une entrée par variable (nom, type, source, signification, transformation, usage)
+- [x] `scripts/data_generator.py` opérationnel, seed=42, génère cost_price/stock/promotion/discount
+- [x] Échantillon nettoyé exporté dans `data/sample/`
+- [x] `docs/data_quality.md` : règles minimales appliquées et testées (9 tests Pytest, dont 3 d'intégration sur l'échantillon réel)
 
 ## J2 — Jeudi 20/08 — Jalon 3 (Data Lake R2) + Jalon 4 (Data Warehouse)
 

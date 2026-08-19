@@ -1,5 +1,6 @@
 # Data engineering
 pandas>=2.2
+openpyxl>=3.1        # lecture online_retail_II.xlsx (UCI)
 pyspark>=3.5
 duckdb>=1.0
 pyarrow>=16.0
@@ -7,8 +8,9 @@ boto3>=1.34          # client S3-compatible pour Cloudflare R2
 sqlalchemy>=2.0
 psycopg2-binary>=2.9
 
-# Data quality
-great_expectations>=0.18
+# Data quality : assertions Pytest (great_expectations écarté, voir AGENTS.md
+# alternative explicite §2 ; son import déclenche un sys.exit() silencieux
+# quand une dépendance optionnelle grpc/protobuf manque — cf. .claude/memory/learnings.md)
 pytest>=8.0
 
 # Data science
