@@ -15,6 +15,7 @@ project: ecommerce-pricing-recommendation
 | LRN-006 | 2026-08-19 | Les colonnes `object` pandas à types mixtes (int + str) font planter `to_parquet` (pyarrow) — caster en `str` avant export |
 | LRN-007 | 2026-08-19 | Le `transactionid` RetailRocket n'est pas unique par ligne d'événement : plusieurs items d'un même panier le partagent |
 | LRN-008 | 2026-08-19 | MLflow imprime des emojis sur stdout qui font planter tout script Python sur console Windows (cp1252) — même après un run réussi |
+| LRN-009 | 2026-08-19 | Un prix à 0 (article offert) casse une régression log-log (log(0) indéfini) — filtrer les prix strictement positifs en amont |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -71,3 +72,10 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : `mlflow.start_run()` imprime sur stdout des messages contenant des emojis (🏃 pour le lien du run, 🧪 pour l'expérience) à la fin du `with` block. Sur une console Windows dont l'encodage par défaut est `cp1252` (pas UTF-8), `sys.stdout.write(...)` lève `UnicodeEncodeError` — le script plante avec un traceback qui pointe vers MLflow, alors que l'entraînement et le logging des métriques ont déjà réussi (visible dans les lignes de sortie juste avant le crash).
 **Contexte** : premier lancement de `src/forecasting/train.py` (Jalon 5) — se reproduira sur tout futur script Python qui utilise MLflow en console Windows (pricing, recommendation, Jalons 6-7).
 **Application future** : au tout début de tout script qui importe `mlflow` et tourne potentiellement sur console Windows, forcer l'encodage stdout/stderr en UTF-8 avant l'import (`sys.stdout.reconfigure(encoding="utf-8", errors="replace")` si `sys.platform == "win32"`). Si un script MLflow plante avec un `UnicodeEncodeError` pointant vers `_log_url`, ce n'est presque jamais un vrai échec du run — vérifier d'abord les lignes de sortie précédentes avant de re-déboguer la logique métier.
+
+## LRN-009 — `log(0)` casse une régression log-log sans message clair
+
+**Date** : 2026-08-19
+**Pattern observé** : `fact_sales.unit_price` peut valoir exactement 0 (article offert / remise à 100 %, valide selon `docs/data_quality.md` qui n'exige que `unit_price >= 0`). Une régression log-log (`np.polyfit` sur `log(prix)`) plante alors avec `numpy.linalg.LinAlgError: SVD did not converge`, précédé de `RuntimeWarning: divide by zero encountered in log` — le message ne pointe pas directement vers la cause (une seule ligne à prix 0 suffit à casser tout le fit).
+**Contexte** : estimation de l'élasticité prix-demande (Jalon 6, `src/pricing/elasticity.py`).
+**Application future** : avant tout calcul en log sur une colonne prix/quantité qui peut légitimement contenir des zéros (remise à 100 %, article offert), filtrer les valeurs strictement positives en amont plutôt que de découvrir le crash à l'exécution sur données réelles — les tests unitaires sur données synthétiques ne le révèlent pas si elles ne couvrent pas ce cas limite.

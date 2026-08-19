@@ -54,10 +54,10 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 - [x] Log MLflow (expérience `forecasting`, 3 runs)
 
 **Jalon 6 — Pricing**
-- [ ] Estimation élasticité à partir de l'historique prix/demande
-- [ ] Simulation de prix (plusieurs points de prix testés)
-- [ ] Sélection du prix qui maximise la marge estimée
-- [ ] Formulation prudente dans la doc ("sous les hypothèses du modèle...")
+- [x] Estimation élasticité à partir de l'historique prix/demande (1057/4631 produits éligibles, régression log-log ; fallback assumé -1,5 documenté pour le reste, cf. `docs/pricing.md`)
+- [x] Simulation de prix (grille de 13 points, -30 % à +30 %)
+- [x] Sélection du prix qui maximise la marge estimée
+- [x] Formulation prudente dans la doc — `docs/pricing.md` (R² médian 0,12 explicitement signalé, uplift jamais présenté comme un gain réel)
 
 **Jalon 7 — Recommendation**
 - [ ] Baseline Most Popular

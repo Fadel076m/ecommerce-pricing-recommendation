@@ -23,10 +23,10 @@ quality:
 	pytest tests/test_data_quality.py -v
 
 forecast:
-	python3 src/forecasting/train.py
+	python3 -m src.forecasting.train
 
 pricing:
-	python3 src/pricing/simulate.py
+	python3 -m src.pricing.train
 
 recommend:
 	python3 src/recommendation/train.py

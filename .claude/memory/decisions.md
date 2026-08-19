@@ -16,6 +16,7 @@ project: ecommerce-pricing-recommendation
 | BDR-007 | 2026-08-19 | `fact_inventory` = un instantané par produit, pas une série temporelle quotidienne | actif |
 | BDR-008 | 2026-08-19 | Lecture R2 en DuckDB via secret `TYPE s3` générique (endpoint explicite), pas `TYPE r2` | actif |
 | BDR-009 | 2026-08-19 | Forecasting : comparaison Baseline/Prophet sur la demande agrégée + LightGBM global par produit (pas un Prophet par produit) | actif |
+| BDR-010 | 2026-08-19 | Pricing : élasticité estimée seulement si éligible (1057/4631 produits), fallback assumé -1,5 sinon, bornée à [-10,0] | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -88,3 +89,11 @@ project: ecommerce-pricing-recommendation
 **Pourquoi** : Prophet ne modélise qu'une série à la fois — entraîner un Prophet par produit (4600 modèles) était intraitable dans le temps du projet. Le pattern "modèle global" (un seul modèle, l'identité de la série en feature) est l'approche standard pour ce volume de séries et permet de répondre à l'API pour tout produit sans réentraînement par référence.
 **Alternatives considérées** : Prophet sur un échantillon de top-N produits (rejeté — n'aurait couvert qu'une fraction du catalogue pour l'API) ; un modèle LightGBM par produit (rejeté — même problème de scalabilité que Prophet, en pire).
 **Statut** : actif. Les deux résultats (agrégé vs par-produit) ne sont pas comparables entre eux — documenté explicitement dans `docs/forecasting.md` pour ne pas induire en erreur au moment du rapport/soutenance.
+
+## BDR-010 — Pricing : élasticité éligible ou fallback assumé, bornée
+
+**Date** : 2026-08-19
+**Décision** : n'estimer l'élasticité par régression log-log que pour les produits ayant ≥20 observations, ≥5 prix distincts et un coefficient de variation du prix >5 % (1057/4631 produits) ; les autres reçoivent une élasticité **assumée** par défaut (-1,5, documentée comme hypothèse, pas une mesure). Dans les deux cas, l'élasticité est bornée à `[-10, 0]` avant d'entrer dans la simulation de prix.
+**Pourquoi** : un audit SQL préalable a montré que la grande majorité du catalogue UCI n'a quasiment aucune variation de prix historique — une régression y serait du pur bruit. Sur les produits éligibles eux-mêmes, le R² médian mesuré est très faible (0,12) et quelques régressions sortent des coefficients positifs par artefact statistique (bien "normal" attendu à élasticité négative) — sans bornage, cela inverserait le sens de la recommandation de prix pour ces produits.
+**Alternatives considérées** : régression pooled avec effets fixes produit/catégorie (rejeté — plus robuste en théorie mais complexité et temps disproportionnés pour un R² qui resterait probablement faible faute de vraie variation exogène de prix) ; ne pas fixer de bornes (rejeté après avoir constaté des élasticités positives en sortie de régression brute).
+**Statut** : actif. Le R² médian faible (0,12) et le fallback à 77 % du catalogue sont documentés en clair dans `docs/pricing.md`, jamais présentés comme des résultats fiables sans réserve.
