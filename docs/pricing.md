@@ -1,6 +1,6 @@
 # Pricing — Jalon 6
 
-> **Sous les hypothèses du modèle et de la simulation** (AGENTS.md §4/§10). L'élasticité estimée n'est **pas causale** : c'est une régression sur données observationnelles (log-log), pas une expérimentation contrôlée (pas de test A/B). Aucun chiffre de cette page ne doit être présenté comme une vérité mesurée dans le rapport ou la soutenance.
+> **Sous les hypothèses du modèle et de la simulation.** L'élasticité estimée n'est **pas causale** : c'est une régression sur données observationnelles (log-log), pas une expérimentation contrôlée (pas de test A/B). Aucun chiffre de cette page ne doit être présenté comme une vérité mesurée dans le rapport ou la soutenance.
 
 ## Méthodologie
 

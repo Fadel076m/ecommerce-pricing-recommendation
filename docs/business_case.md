@@ -11,7 +11,7 @@ Calculés directement depuis les données historiques du Data Warehouse (Jalon 4
 Produits par les modèles entraînés (Jalon 5-7) : demande future (forecasting), prix recommandé et marge estimée (pricing), produits recommandés (recommendation). Toujours accompagnés de leurs métriques de validation (MAE/RMSE/MAPE, Precision@K/Recall@K/MAP@K) pour que leur fiabilité soit visible.
 
 ## Résultats simulés
-Produits par un scénario business appliquant les résultats prédits à l'historique (Jalon 6, simulation de prix) : gain de marge potentiel, impact pricing, impact recommandations, ROI estimé. **Toujours formulés "sous les hypothèses du modèle et de la simulation"** (AGENTS.md §4/§10) — jamais présentés comme une performance réelle ni comme une garantie.
+Produits par un scénario business appliquant les résultats prédits à l'historique (Jalon 6, simulation de prix) : gain de marge potentiel, impact pricing, impact recommandations, ROI estimé. **Toujours formulés "sous les hypothèses du modèle et de la simulation"** — jamais présentés comme une performance réelle ni comme une garantie.
 
 ## Hypothèses de simulation (à documenter au fur et à mesure)
 

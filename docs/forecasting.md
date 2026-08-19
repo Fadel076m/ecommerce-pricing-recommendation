@@ -11,12 +11,12 @@ Les deux approches ne sont **pas comparables entre elles** (granularités diffé
 
 ## Méthodologie
 
-- Split **temporel strict** : 30 derniers jours en test, aucune donnée du futur dans le train (AGENTS.md §4). Vérifié par `tests/test_forecasting.py::test_temporal_split_has_no_leakage`.
+- Split **temporel strict** : 30 derniers jours en test, aucune donnée du futur dans le train. Vérifié par `tests/test_forecasting.py::test_temporal_split_has_no_leakage`.
 - LightGBM : évalué en **1 pas en avant** (one-step-ahead) — les features de lag/moyenne mobile du test utilisent les vraies valeurs passées, pas des prédictions rebouclées. L'application récursive sur un horizon J+1..J+7 pour l'API est un choix d'implémentation du Jalon 8, pas mesuré ici.
 - Produits filtrés à ≥30 jours de ventes observées (2961 produits retenus sur ~4600) pour éviter d'entraîner sur du pur bruit ; les produits en dessous de ce seuil sont servis par la baseline dans l'API.
 - Toutes les expériences loggées dans MLflow (expérience `forecasting`), modèle LightGBM sauvegardé en artefact (`models/forecasting_lightgbm_global.txt`, non versionné).
 
-## Résultats (19/08/2026, sous hypothèses des variables synthétiques — cf. AGENTS.md §4)
+## Résultats (19/08/2026, sous hypothèses des variables synthétiques)
 
 | Modèle | Granularité | MAE | RMSE | MAPE |
 |---|---|---|---|---|
@@ -26,7 +26,7 @@ Les deux approches ne sont **pas comparables entre elles** (granularités diffé
 
 **Prophet bat la baseline** sur MAE et RMSE (critère de validation du jalon) sur la série agrégée.
 
-## Avertissement MAPE (roadmap Jalon 5, AGENTS.md §4)
+## Avertissement MAPE (roadmap Jalon 5)
 
 Le MAPE explose sur les trois modèles : la demande quotidienne (agrégée comme par produit) passe fréquemment proche de 0, ce qui fait diverger un pourcentage d'erreur relatif même avec un epsilon de stabilisation au dénominateur. **MAE et RMSE sont les métriques de référence pour ce projet** ; le MAPE est conservé par transparence (et parce que la roadmap le demande) mais ne doit jamais être cité seul dans le rapport final ou la soutenance.
 

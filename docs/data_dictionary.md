@@ -1,12 +1,12 @@
 # Data Dictionary
 
-> Une ligne par variable, jamais de variable non documentée (AGENTS.md §3). Modèle en étoile imposé par le brief ISM (section 11) et repris dans `AGENTS.md` : `dim_customer`, `dim_product`, `dim_date`, `dim_promotion`, `fact_sales`, `fact_inventory`, `fact_web_events`. Statuts utilisés dans la colonne "Source" :
+> Une ligne par variable, jamais de variable non documentée. Modèle en étoile imposé par le brief ISM (section 11) : `dim_customer`, `dim_product`, `dim_date`, `dim_promotion`, `fact_sales`, `fact_inventory`, `fact_web_events`. Statuts utilisés dans la colonne "Source" :
 >
 > - **Observé** : valeur directement présente dans une source publique.
 > - **Dérivé** : calculée/transformée à partir d'une ou plusieurs colonnes observées (règle explicite, pas de hasard).
-> - **Synthétique (seed=42)** : générée par `scripts/data_generator.py`, aucune contrepartie réelle dans les sources publiques — jamais à présenter comme une donnée observée (AGENTS.md §3/§4).
+> - **Synthétique (seed=42)** : générée par `scripts/data_generator.py`, aucune contrepartie réelle dans les sources publiques — jamais à présenter comme une donnée observée.
 >
-> Le brief (section 11.6) nomme cette table `fact_promotions` ; `AGENTS.md` (§6, arborescence) et la roadmap la nomment `dim_promotion`. On retient `dim_promotion` (cohérent avec `AGENTS.md`, qui fait foi) — note conservée ici pour éviter la confusion en Jalon 4.
+> Le brief (section 11.6) nomme cette table `fact_promotions` ; la roadmap et l'arborescence du repo la nomment `dim_promotion`. On retient `dim_promotion` — note conservée ici pour éviter la confusion en Jalon 4.
 
 ## dim_customer
 
@@ -79,14 +79,14 @@ Complémentaire possible (non prioritaire, Jalon 6+) : `Dunnhumby` fournit de vr
 | opening_stock | int | Synthétique (seed=42) | stock en début de période | `generate_stock_movement()`, calibré sur `avg_daily_sales` observé | KPI Stock, rupture/surstock |
 | stock_in | int | Synthétique (seed=42) | réapprovisionnement de la période | `generate_stock_movement()` | KPI Stock |
 | quantity_sold | int | Observé — agrégation de `fact_sales.quantity` par produit/date | quantité vendue sur la période | somme des ventes observées | cohérence stock, forecasting |
-| closing_stock | int | Dérivé | stock en fin de période | `opening_stock + stock_in - quantity_sold` (règle de cohérence vérifiée en test, cf. `docs/data_quality.md` et AGENTS.md §4) | KPI Stock, rupture/surstock |
+| closing_stock | int | Dérivé | stock en fin de période | `opening_stock + stock_in - quantity_sold` (règle de cohérence vérifiée en test, cf. `docs/data_quality.md`) | KPI Stock, rupture/surstock |
 
 ## fact_web_events
 
 | Colonne | Type | Source | Signification | Transformation | Usage |
 |---|---|---|---|---|---|
 | event_id | string | Observé — RetailRocket (`transactionid` quand présent, sinon généré depuis `timestamp`+`visitorid`+`itemid`) | identifiant événement | — | clé technique |
-| customer_id | string | Observé — RetailRocket (`visitorid`) | référence visiteur | renommage, anonymisé par l'éditeur de la source (cf. `docs/rgpd.md`) | jointure `dim_customer` — **note : `visitorid` RetailRocket et `customer_id` UCI sont des espaces d'identifiants distincts, jamais fusionnés directement (AGENTS.md §3)** |
+| customer_id | string | Observé — RetailRocket (`visitorid`) | référence visiteur | renommage, anonymisé par l'éditeur de la source (cf. `docs/rgpd.md`) | jointure `dim_customer` — **note : `visitorid` RetailRocket et `customer_id` UCI sont des espaces d'identifiants distincts, jamais fusionnés directement** |
 | product_id | string | Observé — RetailRocket (`itemid`) | référence produit consulté | — | jointure — **même note : `itemid` RetailRocket ≠ `StockCode` UCI, espaces distincts** |
 | session_id | string | Dérivé — reconstruit à partir de `visitorid` + fenêtre temporelle (RetailRocket ne fournit pas de `session_id` explicite) | session de navigation | règle de découpage à définir en Jalon 3 (ex. inactivité > 30 min = nouvelle session) | recommendation collaborative |
 | event_type | string | Observé — RetailRocket (`event` : view / addtocart / transaction) | type d'événement | renommage vers la nomenclature du brief (`view`, `add_to_cart`, `purchase`) | recommendation collaborative |
@@ -94,4 +94,4 @@ Complémentaire possible (non prioritaire, Jalon 6+) : `Dunnhumby` fournit de vr
 
 ## Note sur les espaces d'identifiants
 
-Rappel explicite (AGENTS.md §3) : les `customer_id`/`product_id` de `fact_sales` (UCI) et `fact_web_events` (RetailRocket) ne référencent **pas** les mêmes individus/produits réels — ce sont deux sources indépendantes avec des identifiants propres. Elles ne sont jamais fusionnées par identifiant direct ; chaque table du modèle en étoile reste rattachée à sa source d'origine, et les usages cross-source (ex. recommendation hybride) passent par des features agrégées, jamais par une jointure `customer_id = visitorid`.
+Rappel explicite : les `customer_id`/`product_id` de `fact_sales` (UCI) et `fact_web_events` (RetailRocket) ne référencent **pas** les mêmes individus/produits réels — ce sont deux sources indépendantes avec des identifiants propres. Elles ne sont jamais fusionnées par identifiant direct ; chaque table du modèle en étoile reste rattachée à sa source d'origine, et les usages cross-source (ex. recommendation hybride) passent par des features agrégées, jamais par une jointure `customer_id = visitorid`.

@@ -1,4 +1,4 @@
-"""Baseline Most Popular (Jalon 7) — obligatoire avant modèle complexe (AGENTS.md §4)."""
+"""Baseline Most Popular (Jalon 7) — obligatoire avant modèle complexe."""
 import pandas as pd
 
 

@@ -4,17 +4,17 @@
 
 Le signal comportemental riche (view/add_to_cart/purchase) demandé par la roadmap Jalon 7 **n'existe que dans RetailRocket** (`visitor_id`/`item_id`) — UCI Online Retail II ne contient que des transactions complétées, pas de navigation. Le moteur de recommandation est donc construit **entièrement dans l'espace RetailRocket**.
 
-**Conséquence explicite pour l'API (Jalon 8)** : `GET /recommendations/{customer_id}` documenté dans `docs/api.md` opère en réalité sur un `visitor_id` RetailRocket, pas sur un `customer_id` UCI (`fact_sales`/`dim_customer`) — ces deux espaces d'identifiants ne se recoupent pas et ne sont jamais fusionnés (AGENTS.md §3, `docs/data_dictionary.md`). C'est une limite structurelle du dataset composite à trois sources publiques indépendantes, pas un bug à corriger : à rappeler dans la documentation de l'API et dans le rapport final.
+**Conséquence explicite pour l'API (Jalon 8)** : `GET /recommendations/{customer_id}` documenté dans `docs/api.md` opère en réalité sur un `visitor_id` RetailRocket, pas sur un `customer_id` UCI (`fact_sales`/`dim_customer`) — ces deux espaces d'identifiants ne se recoupent pas et ne sont jamais fusionnés (voir `docs/data_dictionary.md`). C'est une limite structurelle du dataset composite à trois sources publiques indépendantes, pas un bug à corriger : à rappeler dans la documentation de l'API et dans le rapport final.
 
 ## Méthodologie
 
 1. **Filtrage** : visiteurs et items avec ≥5 interactions retenus (81 318 visiteurs, 67 625 items, 897 028 interactions sur 2 756 101 événements bruts) — le very-long-tail à 1-2 interactions n'apporte pas de signal exploitable pour un split temporel.
-2. **Split temporel strict** (AGENTS.md §4) : coupure globale à 80 % de la période (14/08/2015), toutes les interactions avant en train, après en test. Testé (`tests/test_recommendation.py::test_temporal_split_has_no_leakage`).
+2. **Split temporel strict** : coupure globale à 80 % de la période (14/08/2015), toutes les interactions avant en train, après en test. Testé (`tests/test_recommendation.py::test_temporal_split_has_no_leakage`).
 3. **Échantillon d'évaluation** : 5000 visiteurs tirés (seed=42) parmi ceux présents à la fois en train et en test — nécessaire pour garder l'évaluation tractable (81 318 visiteurs × 4 approches aurait été trop long dans le temps imparti).
 4. **Quatre approches** (`src/recommendation/`) :
    - **Baseline Most Popular** (`baseline.py`) : items les plus populaires (poids `view=1/add_to_cart=3/purchase=5`), identiques pour tous.
-   - **Content-based** (`content_based.py`) : catégorie de chaque item (`item_properties_part1/2.csv`, filtré en DuckDB sur les items retenus — jamais chargé en pandas brut, AGENTS.md §3/LRN-001), popularité par catégorie, items jamais interagis inclus avec un poids de base (sinon le content-based perd son intérêt principal : recommander des items froids).
-   - **Collaborative filtering** (`collaborative.py`) : TruncatedSVD (scikit-learn, 50 dimensions) sur la matrice creuse visiteur×item pondérée, recherche des voisins par produit scalaire via FAISS (stack imposée, AGENTS.md §2).
+   - **Content-based** (`content_based.py`) : catégorie de chaque item (`item_properties_part1/2.csv`, filtré en DuckDB sur les items retenus — jamais chargé en pandas brut), popularité par catégorie, items jamais interagis inclus avec un poids de base (sinon le content-based perd son intérêt principal : recommander des items froids).
+   - **Collaborative filtering** (`collaborative.py`) : TruncatedSVD (scikit-learn, 50 dimensions) sur la matrice creuse visiteur×item pondérée, recherche des voisins par produit scalaire via FAISS.
    - **Hybride** (`hybrid.py`) : fusion Reciprocal Rank Fusion des classements content-based et collaborative.
 5. **Métriques** : Precision@10 / Recall@10 / MAP@10, loggées dans MLflow (expérience `recommendation`, 4 runs).
 

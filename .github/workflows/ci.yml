@@ -18,8 +18,8 @@ jobs:
       - name: Install dependencies
         run: pip install --timeout 100 --retries 10 -r requirements.txt
       # Les sources brutes (data/raw_local/) et les artefacts entraînés (models/)
-      # ne sont pas versionnés (AGENTS.md §6/§3) : les tests d'intégration qui en
-      # dépendent se marquent `skipif` automatiquement et n'échouent pas ici.
+      # ne sont pas versionnés : les tests d'intégration qui en dépendent se
+      # marquent `skipif` automatiquement et n'échouent pas ici.
       # Cette étape exécute la partie testable sans données locales : logique de
       # transformation/évaluation/simulation, et vérifie que tous les modules du
       # projet s'importent sans erreur (régression de dépendances).

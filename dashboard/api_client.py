@@ -1,6 +1,6 @@
 """
 Client HTTP vers l'API FastAPI (Jalon 9). Le dashboard ne recalcule jamais
-aucune logique métier — il affiche ce que l'API renvoie (AGENTS.md §5).
+aucune logique métier — il affiche ce que l'API renvoie.
 """
 import os
 

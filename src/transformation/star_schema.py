@@ -4,7 +4,7 @@ publiques + variables synthétiques (seed=42). Logique partagée entre
 scripts/data_generator.py (échantillon Jalon 2) et le pipeline complet
 Jalon 3/4 (src/ingestion, src/transformation).
 
-Règles non négociables (AGENTS.md §4) :
+Règles non négociables :
 - pas de data leakage ;
 - closing_stock = opening_stock + stock_in - quantity_sold ;
 - variables synthétiques identifiées comme telles (docs/data_dictionary.md).
@@ -53,7 +53,7 @@ def load_raw_sales(path: Path = RAW_XLSX) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(
             f"{path} introuvable. Copier online_retail_II.xlsx depuis "
-            "'Projet Ecommerce/data' vers data/raw_local/ (non versionné, cf. AGENTS.md §6)."
+            "'Projet Ecommerce/data' vers data/raw_local/ (non versionné)."
         )
     sheets = pd.read_excel(path, sheet_name=None, engine="openpyxl")
     df = pd.concat(sheets.values(), ignore_index=True)
@@ -177,7 +177,7 @@ def build_dim_promotion(dim_product: pd.DataFrame, sales: pd.DataFrame) -> pd.Da
 
 
 def build_fact_sales(sales: pd.DataFrame, dim_product: pd.DataFrame, dim_promotion: pd.DataFrame) -> pd.DataFrame:
-    """fact_sales enrichi : discount/revenue/cost/margin dérivés (AGENTS.md §4)."""
+    """fact_sales enrichi : discount/revenue/cost/margin dérivés."""
     cost_by_product = dim_product.set_index("product_id")["cost_price"]
     discount_by_product = (
         dim_promotion.set_index("product_id")["discount_percentage"] if not dim_promotion.empty else pd.Series(dtype=float)

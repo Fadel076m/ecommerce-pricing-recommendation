@@ -1,7 +1,7 @@
 """
 Estimation de l'élasticité prix-demande (Jalon 6).
 
-AGENTS.md §4 : l'élasticité estimée n'est pas causale — c'est une régression
+L'élasticité estimée n'est pas causale — c'est une régression
 sur données observationnelles (log(quantité) ~ log(prix) par produit), pas une
 expérimentation contrôlée. À ne jamais présenter comme une vérité absolue,
 toujours "sous les hypothèses du modèle" (cf. docs/pricing.md).

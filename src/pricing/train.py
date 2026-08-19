@@ -10,7 +10,7 @@ import sys
 
 if sys.platform == "win32":
     # MLflow imprime des emojis sur stdout, cp1252 (console Windows) plante dessus
-    # même après un run réussi (cf. .claude/memory/learnings.md LRN-008).
+    # même après un run réussi.
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 

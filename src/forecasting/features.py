@@ -8,7 +8,7 @@ model") pour ce type de panel de séries temporelles.
 
 Toutes les features (lags, moyennes mobiles) sont calculées à partir du passé
 strict de chaque produit (`shift` avant `rolling`) : aucune fuite d'information
-du futur (AGENTS.md §4).
+du futur.
 """
 import pandas as pd
 

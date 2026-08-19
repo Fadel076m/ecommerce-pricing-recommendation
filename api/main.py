@@ -3,9 +3,7 @@ FastAPI — Jalon 8. Endpoints définis dans docs/api.md.
 
 L'API consomme les artefacts des Jalons 5-7 (src/forecasting, src/pricing,
 src/recommendation) via api/services.py, elle ne recalcule aucune logique
-métier elle-même (AGENTS.md §5 : "le dashboard ne doit pas dupliquer de
-logique métier" — même principe appliqué ici à l'API vis-à-vis des modules
-d'entraînement).
+métier elle-même — même principe que pour le dashboard vis-à-vis de l'API.
 """
 from contextlib import asynccontextmanager
 
@@ -86,7 +84,7 @@ def get_recommendations(customer_id: str):
 
 
 # --- Routes support dashboard (Jalon 9) : KPIs agrégés, listes pour dropdowns ---
-# AGENTS.md §5 : le dashboard consomme l'API, il ne recalcule aucune agrégation lui-même.
+# Le dashboard consomme l'API, il ne recalcule aucune agrégation lui-même.
 
 
 @app.get("/kpis/summary", response_model=KpiSummaryResponse)

@@ -3,8 +3,7 @@
 # (models/*.parquet, *.txt) et ne réentraîne rien, donc pas besoin de
 # pyspark/prophet/scikit-learn/faiss/duckdb/boto3/dash/mlflow ici — installer
 # l'image complète faisait échouer le build (timeout réseau sur un gros
-# téléchargement, cf. .claude/memory/learnings.md) et grossissait l'image
-# pour rien.
+# téléchargement) et grossissait l'image pour rien.
 fastapi>=0.111
 uvicorn[standard]>=0.30
 pydantic>=2.7

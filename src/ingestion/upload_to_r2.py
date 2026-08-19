@@ -6,8 +6,7 @@ Structure du bucket (brief ISM section 7) :
     processed/  données nettoyées/typées/dédupliquées (modèle en étoile)
 
 Ne jamais uploader les fichiers bruts CSV/XLSX tels quels (quotas R2 free
-tier, AGENTS.md §3) : toujours convertir en Parquet et ne garder que les
-colonnes utiles.
+tier) : toujours convertir en Parquet et ne garder que les colonnes utiles.
 
 Usage : python -m src.ingestion.upload_to_r2
 """
@@ -36,7 +35,7 @@ def get_r2_client():
     if not all([endpoint, access_key, secret_key, bucket]):
         raise RuntimeError(
             "Identifiants R2 manquants dans .env (R2_ENDPOINT_URL/R2_ACCESS_KEY_ID/"
-            "R2_SECRET_ACCESS_KEY/R2_BUCKET_NAME). Voir AGENTS.md §3 / README pour la procédure."
+            "R2_SECRET_ACCESS_KEY/R2_BUCKET_NAME). Voir README pour la procédure."
         )
     client = boto3.client(
         "s3",

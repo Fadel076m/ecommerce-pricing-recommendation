@@ -7,8 +7,8 @@ source du projet avec un vrai signal comportemental view/add_to_cart/purchase
 ce sont des individus/produits différents (cf. docs/data_dictionary.md).
 
 item_properties_part1/2.csv (~900 Mo cumulés) ne doivent jamais être chargés
-avec pandas brut (AGENTS.md §3, LRN-001) : lecture DuckDB filtrée sur les
-itemid réellement présents dans les interactions retenues, comme prévu.
+avec pandas brut : lecture DuckDB filtrée sur les itemid réellement présents
+dans les interactions retenues.
 """
 from pathlib import Path
 import os
@@ -66,12 +66,12 @@ def load_filtered_interactions(engine=None) -> pd.DataFrame:
 
 def load_item_categories(item_ids) -> pd.DataFrame:
     """categoryid le plus récent par item, lu en filtré depuis item_properties_part1/2.csv
-    (DuckDB, jamais pandas brut sur ces fichiers — cf. AGENTS.md §3)."""
+    (DuckDB, jamais pandas brut sur ces fichiers)."""
     for path in ITEM_PROPERTIES_FILES:
         if not path.exists():
             raise FileNotFoundError(
                 f"{path} introuvable. Copier item_properties_part1/2.csv depuis "
-                "'Projet Ecommerce/data' vers data/raw_local/ (non versionné, cf. AGENTS.md §6)."
+                "'Projet Ecommerce/data' vers data/raw_local/ (non versionné)."
             )
 
     con = duckdb.connect()

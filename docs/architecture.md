@@ -32,7 +32,7 @@ Forecasting Pricing Recommendation
 DASHBOARD DÉCISIONNEL
 ```
 
-Détail complet dans le brief ISM (section 5 et 54). Stack figée dans `AGENTS.md`.
+Détail complet dans le brief ISM (section 5 et 54).
 
 ## Modèle en étoile (Data Warehouse)
 

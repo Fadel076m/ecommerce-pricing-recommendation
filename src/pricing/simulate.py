@@ -3,7 +3,7 @@ Simulation de prix (Jalon 6) : courbe de demande à élasticité constante,
 plusieurs points de prix testés, sélection du prix qui maximise la marge
 estimée.
 
-AGENTS.md §4/§10 : résultat d'une simulation, jamais une garantie business —
+Résultat d'une simulation, jamais une garantie business —
 "sous les hypothèses du modèle et de la simulation".
 """
 import numpy as np

@@ -15,7 +15,7 @@ class ForecastResponse(BaseModel):
     product_id: str
     model_used: str = Field(description="lightgbm_global ou baseline_moving_average (fallback historique insuffisant)")
     forecast: list[ForecastPoint]
-    disclaimer: str = "Prévision sous les hypothèses du modèle — jamais une garantie (AGENTS.md §4)."
+    disclaimer: str = "Prévision sous les hypothèses du modèle — jamais une garantie."
 
 
 class PricingResponse(BaseModel):
@@ -28,7 +28,7 @@ class PricingResponse(BaseModel):
     estimated_margin_at_recommended_price: float
     elasticity: float
     elasticity_is_estimated: bool = Field(description="False = élasticité assumée par défaut, pas mesurée (cf. docs/pricing.md)")
-    disclaimer: str = "Résultat de simulation sous hypothèses du modèle — jamais une vérité mesurée (AGENTS.md §4/§10)."
+    disclaimer: str = "Résultat de simulation sous hypothèses du modèle — jamais une vérité mesurée."
 
 
 class PricingSimulateRequest(BaseModel):
@@ -50,7 +50,7 @@ class PricingSimulateResponse(BaseModel):
     product_id: str
     elasticity: float
     simulation: list[PriceSimulationPoint]
-    disclaimer: str = "Simulation sous hypothèses du modèle — jamais une vérité mesurée (AGENTS.md §4/§10)."
+    disclaimer: str = "Simulation sous hypothèses du modèle — jamais une vérité mesurée."
 
 
 class RecommendedItem(BaseModel):

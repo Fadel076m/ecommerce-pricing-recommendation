@@ -1,7 +1,7 @@
 """
 Split temporel + métriques d'évaluation (Jalon 5).
 
-AGENTS.md §4 : split temporel strict, jamais de random train/test split.
+Split temporel strict, jamais de random train/test split.
 """
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ def rmse(y_true, y_pred) -> float:
 def mape(y_true, y_pred, epsilon: float = 1.0) -> float:
     """MAPE avec epsilon au dénominateur : la demande quotidienne peut être
     proche de 0 (produits peu vendus certains jours), un MAPE brut y exploserait
-    ou serait indéfini (division par zéro) — cf. AGENTS.md §5, roadmap Jalon 5."""
+    ou serait indéfini (division par zéro) — cf. roadmap Jalon 5."""
     y_true = np.asarray(y_true, dtype=float)
     y_pred = np.asarray(y_pred, dtype=float)
     return float(np.mean(np.abs(y_true - y_pred) / (np.abs(y_true) + epsilon))) * 100

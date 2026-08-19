@@ -2,7 +2,7 @@
 
 Skip si les sources brutes ne sont pas présentes dans data/raw_local/ (non
 versionné) — ces tests ne peuvent tourner que sur une machine ayant copié les
-fichiers depuis 'Projet Ecommerce/data', cf. AGENTS.md §6.
+fichiers depuis 'Projet Ecommerce/data'.
 """
 from pathlib import Path
 import sys

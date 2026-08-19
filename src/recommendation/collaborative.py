@@ -2,7 +2,7 @@
 Collaborative filtering (Jalon 7) : factorisation matricielle implicite
 (TruncatedSVD, scikit-learn) sur la matrice visiteur × item pondérée par
 event_type (view/add_to_cart/purchase), recherche des plus proches voisins en
-produit scalaire via FAISS (stack imposée, AGENTS.md §2).
+produit scalaire via FAISS.
 """
 import faiss
 import numpy as np

@@ -27,7 +27,7 @@ Repris du brief ISM (section 3.2), le projet doit démontrer :
 - une architecture Data Lake (R2, raw/processed/features)
 - une architecture Data Warehouse (PostgreSQL, modèle en étoile)
 - une ingestion batch
-- un streaming simulé (Kafka — sacrifiable en premier si le temps manque, cf. AGENTS.md §9 et roadmap "Rappel — en cas de retard")
+- un streaming simulé (Kafka — sacrifiable en premier si le temps manque, cf. roadmap "Rappel — en cas de retard")
 - des transformations Big Data (PySpark / DuckDB)
 - des contrôles de qualité (Great Expectations / Pytest)
 - du Machine Learning : forecasting, optimisation de prix, système de recommandation
@@ -51,7 +51,7 @@ Dérivés du scénario de démonstration du brief ISM (section 50) :
 1. Le responsable e-commerce ouvre le dashboard et consulte les KPIs globaux (CA, marge, commandes, stock, conversion).
 2. Il consulte le stock d'un produit : la plateforme signale un risque de rupture à horizon X jours.
 3. Il consulte le forecast de ce produit : le système prévoit une demande future (élevée/faible).
-4. Il consulte le pricing du produit : prix actuel, prix recommandé, demande estimée, marge estimée — **toujours présentés comme des résultats sous hypothèses du modèle, jamais comme une vérité absolue** (cf. AGENTS.md §4 et §10).
+4. Il consulte le pricing du produit : prix actuel, prix recommandé, demande estimée, marge estimée — **toujours présentés comme des résultats sous hypothèses du modèle, jamais comme une vérité absolue**.
 5. Il consulte les recommandations pour un client donné : liste de produits recommandés avec score et raison.
 6. Il revient au dashboard avec les informations nécessaires pour prendre une décision (réassort, ajustement de prix, mise en avant de produits).
 
@@ -67,7 +67,7 @@ Repris du brief ISM (section 49), regroupés par domaine :
 | Pricing | Current Price, Recommended Price, Price Difference, Estimated Demand, Estimated Margin, Elasticity |
 | Recommendation | Precision@K, Recall@K, MAP@K, Recommendation CTR, Recommendation Conversion |
 
-Les KPIs Commercial/Marge/Stock sont des **résultats observés** (calculables directement en SQL depuis le Data Warehouse, cf. Jalon 4). Les KPIs Pricing (hors "Current Price") et Recommendation sont des **résultats prédits/simulés** par les moteurs ML — à ne jamais présenter comme des faits observés (cf. `docs/business_case.md` et AGENTS.md §4/§10).
+Les KPIs Commercial/Marge/Stock sont des **résultats observés** (calculables directement en SQL depuis le Data Warehouse, cf. Jalon 4). Les KPIs Pricing (hors "Current Price") et Recommendation sont des **résultats prédits/simulés** par les moteurs ML — à ne jamais présenter comme des faits observés (cf. `docs/business_case.md`).
 
 ## Critère de validation du jalon
 

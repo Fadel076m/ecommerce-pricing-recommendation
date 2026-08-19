@@ -2,8 +2,7 @@
 Traitement de RetailRocket events.csv (~94 Mo) -> fact_web_events.
 
 events.csv est raisonnable pour pandas (contrairement à item_properties_part1/2,
-~900 Mo cumulés, cf. AGENTS.md §3 / .claude/memory/learnings.md LRN-001) mais on
-utilise DuckDB par cohérence avec le reste du pipeline et pour rester scalable
+~900 Mo cumulés) mais on utilise DuckDB par cohérence avec le reste du pipeline et pour rester scalable
 si la source RetailRocket réelle (plus volumineuse) est utilisée plus tard.
 
 visitorid/itemid RetailRocket sont un espace d'identifiants indépendant de
@@ -30,7 +29,7 @@ def build_fact_web_events(path: Path = RAW_EVENTS_CSV) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(
             f"{path} introuvable. Copier events.csv depuis 'Projet Ecommerce/data' "
-            "vers data/raw_local/ (non versionné, cf. AGENTS.md §6)."
+            "vers data/raw_local/ (non versionné)."
         )
 
     con = duckdb.connect()

@@ -1,7 +1,7 @@
 """
 Split temporel + métriques Precision@K / Recall@K / MAP@K (Jalon 7).
 
-AGENTS.md §4 : split temporel strict sur les interactions, jamais de split
+Split temporel strict sur les interactions, jamais de split
 aléatoire. Coupure globale (même date pour tous les visiteurs) plutôt qu'un
 "derniers N% par visiteur" : cohérent avec la méthodologie retenue en
 Forecasting/Pricing, et évite qu'un visiteur "voie" indirectement une période

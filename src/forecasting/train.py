@@ -1,9 +1,9 @@
 """
 Entraînement + évaluation des modèles de forecasting (Jalon 5).
 
-Baseline Moving Average -> Prophet -> LightGBM (AGENTS.md §4 : baseline
-obligatoire avant modèle complexe). Split temporel strict (jamais de random
-split). Toutes les expériences sont loggées dans MLflow (AGENTS.md §4).
+Baseline Moving Average -> Prophet -> LightGBM (baseline obligatoire avant
+modèle complexe). Split temporel strict (jamais de random split). Toutes les
+expériences sont loggées dans MLflow.
 
 Usage : python -m src.forecasting.train
 """

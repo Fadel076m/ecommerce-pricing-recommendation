@@ -58,9 +58,3 @@ Toute la documentation projet est dans `docs/` :
 - `docs/forecasting.md`, `docs/pricing.md`, `docs/recommendation.md` — méthodologie et résultats des 3 moteurs ML
 - `docs/rgpd.md`, `docs/business_case.md` — cadrage business et conformité
 - `docs/cahier_des_charges.md` — cadrage initial
-
-## Pour les agents de code (Claude Code / Codex)
-
-Les instructions canoniques du projet sont dans `AGENTS.md` (importé par `CLAUDE.md`). Toujours les lire avant de commencer une session de travail — voir aussi `PROMPT_KICKOFF.md` pour le prompt de démarrage.
-
-Le projet utilise le système de mémoire Claude Code (`.claude/memory/` : décisions, apprentissages, blocages, journal, évaluations). Lancer `./memory.sh` en début de session pour reprendre le fil, et appliquer le rituel de clôture décrit dans `AGENTS.md` (section 7) en fin de session.

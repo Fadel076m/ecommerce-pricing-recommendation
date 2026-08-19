@@ -4,8 +4,8 @@
 src/transformation/star_schema.py (réutilisée aussi par le pipeline Jalon 3/4).
 
 Toujours utiliser random.seed(42) pour garantir la reproductibilité (brief
-section 15 / AGENTS.md §3). Les variables synthétiques ne doivent jamais être
-présentées comme des données observées (cf. docs/data_dictionary.md).
+section 15). Les variables synthétiques ne doivent jamais être présentées
+comme des données observées (cf. docs/data_dictionary.md).
 
 Usage : python scripts/data_generator.py
 """

@@ -1,4 +1,4 @@
-# Orchestration — optionnelle (Jalon 10, sacrifiable en premier selon AGENTS.md §9 / roadmap).
+# Orchestration — optionnelle (Jalon 10, sacrifiable en premier selon la roadmap).
 # À installer séparément du reste, avec le fichier de contraintes officiel Airflow,
 # car un `pip install apache-airflow` sans contraintes fait tourner le resolver pip
 # indéfiniment (conflits avec fastapi/pydantic/prophet du requirements.txt principal).

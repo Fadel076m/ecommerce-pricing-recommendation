@@ -14,8 +14,8 @@
 
 Documentation Swagger/OpenAPI générée automatiquement par FastAPI sur `/docs`.
 
-Les quatre dernières routes existent pour servir le dashboard (Jalon 9) sans qu'il ait besoin de recalculer la moindre agrégation lui-même (AGENTS.md §5).
+Les quatre dernières routes existent pour servir le dashboard (Jalon 9) sans qu'il ait besoin de recalculer la moindre agrégation lui-même.
 
 ## Note importante — `/recommendations/{customer_id}` (Jalon 7)
 
-Le moteur de recommandation est entraîné dans l'espace d'identifiants **RetailRocket** (`visitor_id`), pas UCI (`customer_id` de `fact_sales`/`dim_customer`) — ces deux sources ne partagent pas les mêmes individus et ne sont jamais fusionnées (AGENTS.md §3). En pratique, `{customer_id}` sur cette route doit être compris comme un `visitor_id` RetailRocket. À documenter explicitement dans le Swagger et rappeler dans la démo/soutenance — cf. `docs/recommendation.md` pour le détail de cette limite structurelle.
+Le moteur de recommandation est entraîné dans l'espace d'identifiants **RetailRocket** (`visitor_id`), pas UCI (`customer_id` de `fact_sales`/`dim_customer`) — ces deux sources ne partagent pas les mêmes individus et ne sont jamais fusionnées. En pratique, `{customer_id}` sur cette route doit être compris comme un `visitor_id` RetailRocket. À documenter explicitement dans le Swagger et rappeler dans la démo/soutenance — cf. `docs/recommendation.md` pour le détail de cette limite structurelle.

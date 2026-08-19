@@ -5,13 +5,21 @@ venv/
 __pycache__/
 *.pyc
 
+# Fichiers de travail internes (non destinés au dépôt public)
+AGENTS.md
+CLAUDE.md
+PROMPT_KICKOFF.md
+memory.sh
+.claude/
+docs/00_diagnostic.md
+
 # Data (jamais versionnée)
 data/raw_local/
 data/sample/*.csv
 data/sample/*.parquet
 !data/sample/.gitkeep
 
-# Modèles et artefacts (AGENTS.md §6 : non versionnés)
+# Modèles et artefacts (non versionnés, sauf l'instantané de démo dans demo/)
 models/*
 !models/.gitkeep
 mlruns/

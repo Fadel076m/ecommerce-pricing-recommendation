@@ -1,6 +1,6 @@
 # Roadmap — Jalons datés (deadline dimanche 23/08/2026)
 
-Mode solo + agents IA (Claude Code / Codex). Les 12 jalons du brief ISM sont compressés sur 6 jours, dans l'ordre de priorité imposé par la section 53 du brief ("Priorités en cas de problème") : Fondations → Intelligence → Produit → Industrialisation → Infrastructure avancée (sacrifiable) → Bonus (sacrifiable).
+Projet solo. Les 12 jalons du brief ISM sont compressés sur 6 jours, dans l'ordre de priorité imposé par la section 53 du brief ("Priorités en cas de problème") : Fondations → Intelligence → Produit → Industrialisation → Infrastructure avancée (sacrifiable) → Bonus (sacrifiable).
 
 Chaque jalon doit se terminer par un commit git dédié et une mise à jour de la checklist ci-dessous.
 
@@ -8,10 +8,10 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 
 **Objectif** : setup technique prêt à coder.
 
-- [x] Repo initialisé, structure créée, `AGENTS.md`/`CLAUDE.md` en place
+- [x] Repo initialisé, structure créée
 - [x] `.env` rempli localement (jamais commité)
 - [x] `docker compose up -d` fonctionnel (Postgres + MLflow)
-- [x] Environnement Python créé, `requirements.txt` installé (venv Python 3.12 — 3.14 écarté, wheels prophet/faiss/lightgbm instables dessus ; Airflow isolé dans `requirements-airflow.txt` ; `great_expectations` retiré, cf. learnings)
+- [x] Environnement Python créé, `requirements.txt` installé (venv Python 3.12 — 3.14 écarté, wheels prophet/faiss/lightgbm instables dessus ; Airflow isolé dans `requirements-airflow.txt` ; `great_expectations` retiré)
 - [x] Démarrage Jalon 1 (cadrage) : problématique, objectifs, périmètre MVP rédigés
 
 ## J1 — Mercredi 19/08 — Jalon 1 (Cadrage) + Jalon 2 (Dataset)
@@ -84,7 +84,7 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 - [x] Docker Compose complet (API + Dashboard + Postgres + MLflow) — les 4 services démarrent et communiquent correctement sur le réseau interne
 - [x] Tests pytest (data quality, API, pricing, recommendation, transformations) — 64 tests, dont 35 tournent sans données locales (simulé en écartant temporairement data/raw_local, models/, data/sample/ — 35 passed, 29 skipped proprement, 0 échec)
 - [x] GitHub Actions CI (tests + build) — bug corrigé : le workflow ne se déclenchait que sur `main`, jamais utilisé (le repo n'a que `master`) ; job `build` ajouté (matrice api/dashboard, Dockerfiles allégés Jalon 8/9)
-- [ ] Kafka et Airflow **seulement si le temps le permet** — ne jamais les prioriser au détriment des 3 modèles ou du dashboard (règle explicite du brief, section 29.8) — volontairement non traités, cohérent avec BDR-004
+- [ ] Kafka et Airflow **seulement si le temps le permet** — ne jamais les prioriser au détriment des 3 modèles ou du dashboard (règle explicite du brief, section 29.8) — volontairement non traités faute de temps
 
 ## J5 — Dimanche 23/08 — Jalon 11 (Documentation) + Jalon 12 (Soutenance) — DEADLINE
 

@@ -1,4 +1,4 @@
-"""Baseline Moving Average (Jalon 5) — obligatoire avant tout modèle complexe (AGENTS.md §4)."""
+"""Baseline Moving Average (Jalon 5) — obligatoire avant tout modèle complexe."""
 import numpy as np
 import pandas as pd
 

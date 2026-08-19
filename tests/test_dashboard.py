@@ -3,8 +3,8 @@ Tests des pages du dashboard (Jalon 9) : les fonctions de callback produisent
 un arbre de composants Dash valide sans exception, à partir de vraies données
 de l'API.
 
-Nécessite l'API accessible (cf. AGENTS.md §6, API_BASE_URL) + les mêmes
-artefacts que tests/test_api.py. Skip entier sinon.
+Nécessite l'API accessible (variable d'environnement API_BASE_URL) + les
+mêmes artefacts que tests/test_api.py. Skip entier sinon.
 """
 from pathlib import Path
 import sys

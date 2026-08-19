@@ -4,7 +4,7 @@ fois au démarrage et exposent des fonctions simples pour les routes FastAPI.
 
 Ne recalcule jamais de logique métier ici qui existerait déjà dans
 src/forecasting, src/pricing, src/recommendation — l'API consomme ces
-modules, elle ne duplique pas leur logique (AGENTS.md §5).
+modules, elle ne duplique pas leur logique.
 """
 from pathlib import Path
 
