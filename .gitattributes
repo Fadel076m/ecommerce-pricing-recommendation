@@ -1,0 +1,9 @@
+# Fichiers binaires : jamais de conversion de fin de ligne, sinon le dump PostgreSQL
+# ou le modèle LightGBM (format texte mais chargé octet à octet) seraient corrompus.
+*.dump binary
+*.parquet binary
+*.npy binary
+demo/models/forecasting_lightgbm_global.txt binary
+
+# Scripts shell : toujours en LF, même exécutés depuis Windows (Git Bash/WSL/Docker Linux).
+*.sh text eol=lf

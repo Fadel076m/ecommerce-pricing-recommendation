@@ -1,4 +1,4 @@
-.PHONY: setup ingest verify-r2 warehouse quality forecast pricing recommend api dashboard test docker-up docker-down
+.PHONY: setup demo ingest verify-r2 warehouse quality forecast pricing recommend api dashboard test docker-up docker-down
 
 setup:
 	@command -v uv >/dev/null 2>&1 && uv venv .venv && . .venv/bin/activate && uv pip install -r requirements.txt || \
@@ -6,6 +6,12 @@ setup:
 
 memory:
 	./memory.sh
+
+# Démo rapide (correction/soutenance) : restaure demo/warehouse_dump.dump
+# (PostgreSQL) et demo/models/ (Jalons 5-7), puis démarre API + Dashboard.
+# Seul prérequis : Docker Desktop. Voir README.md.
+demo:
+	bash scripts/restore_demo.sh
 
 # Jalon 3 : upload raw/processed vers Cloudflare R2 (nécessite data/raw_local/, non versionné,
 # et les identifiants R2 dans .env — cf. AGENTS.md §6).
@@ -35,7 +41,7 @@ api:
 	uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 dashboard:
-	python3 dashboard/app.py
+	python3 -m dashboard.app
 
 test:
 	pytest tests/ -v
