@@ -59,6 +59,31 @@ class RecommendedItem(BaseModel):
     reason: str
 
 
+class KpiSummaryResponse(BaseModel):
+    revenue_total: float
+    margin_total: float
+    orders_total: int
+    average_order_value: float
+    n_products: int
+    n_customers: int
+
+
+class InventoryRiskItem(BaseModel):
+    product_id: str
+    product_name: str
+    closing_stock: int
+    days_of_stock_estimated: float | None
+
+
+class ProductSummary(BaseModel):
+    product_id: str
+    product_name: str
+
+
+class SampleVisitorsResponse(BaseModel):
+    visitor_ids: list[str]
+
+
 class RecommendationResponse(BaseModel):
     customer_id: str
     is_cold_start_fallback: bool = Field(description="True = visitor_id inconnu du modèle, recommandations Most Popular")

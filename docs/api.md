@@ -7,8 +7,14 @@
 | GET | /pricing/{product_id} | Prix actuel, prix recommandé, marge estimée |
 | GET | /recommendations/{customer_id} | Liste de produits recommandés avec score et raison |
 | POST | /pricing/simulate | Simulation de prix sur une plage de valeurs |
+| GET | /kpis/summary | KPIs globaux observés (CA, marge, commandes, panier moyen, n produits/clients) — Jalon 9, Page Executive |
+| GET | /kpis/inventory | Produits les plus à risque de rupture (jours de stock estimés) — Jalon 9, Page Inventory |
+| GET | /products | Recherche de produits (id + nom) pour les dropdowns du dashboard |
+| GET | /visitors/sample | Échantillon de visitor_id connus du modèle de recommandation, pour démo |
 
 Documentation Swagger/OpenAPI générée automatiquement par FastAPI sur `/docs`.
+
+Les quatre dernières routes existent pour servir le dashboard (Jalon 9) sans qu'il ait besoin de recalculer la moindre agrégation lui-même (AGENTS.md §5).
 
 ## Note importante — `/recommendations/{customer_id}` (Jalon 7)
 

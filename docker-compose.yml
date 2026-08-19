@@ -51,6 +51,10 @@ services:
     container_name: ecommerce_dashboard
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Le dashboard appelle l'API par son nom de service dans le réseau
+      # docker-compose, pas localhost (cf. api service ci-dessus).
+      API_BASE_URL: http://api:8000
     ports:
       - "8050:8050"
     depends_on:

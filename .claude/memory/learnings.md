@@ -21,6 +21,8 @@ project: ecommerce-pricing-recommendation
 | LRN-012 | 2026-08-19 | L'encodage catégoriel LightGBM dépend de l'ordre exact des catégories vues à l'entraînement — à persister et réutiliser tel quel à l'inférence |
 | LRN-013 | 2026-08-19 | `lightgbm` a besoin de `libgomp1` (OpenMP) au runtime, absent de `python:3.11-slim` |
 | LRN-014 | 2026-08-19 | Un `pip install` dans un build Docker peut timeout sur un réseau instable même avec peu de paquets — `--timeout`/`--retries` généreux évite un échec évitable |
+| LRN-015 | 2026-08-19 | Un serveur local et un conteneur Docker peuvent se disputer le même port sans erreur visible — vérifier `docker compose ps` avant de suspecter le code |
+| LRN-016 | 2026-08-19 | `python script.py` (au lieu de `python -m package.module`) casse les imports absolus `from package...` dans un Dockerfile CMD |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -119,3 +121,17 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : `pip install -r requirements-api.txt` (une dizaine de paquets légers) a échoué deux fois de suite avec `ReadTimeoutError` sur `files.pythonhosted.org`, avant de réussir à la troisième tentative — indépendamment de la taille des paquets, donc pas un problème de gros téléchargement (contrairement à LRN précédents sur pyspark/prophet) mais de latence/instabilité réseau ponctuelle du poste vers PyPI depuis le contexte Docker build.
 **Contexte** : build de l'image `ecommerce_api` (Jalon 8).
 **Application future** : ajouter systématiquement `--timeout 100 --retries 10` (ou équivalent) à tout `pip install` dans un Dockerfile, même pour une liste de dépendances courte — ça ne coûte rien en cas de réseau stable et évite un échec de build entièrement transitoire.
+
+## LRN-015 — Serveur local vs conteneur Docker sur le même port : conflit silencieux
+
+**Date** : 2026-08-19
+**Pattern observé** : un `docker compose up -d api` laissé actif liait déjà le port hôte 8000. Un `uvicorn` local lancé ensuite sur ce même port n'a produit aucune erreur visible dans les vérifications rapides (`/health` répondait 200 dans les deux cas) — mais les nouvelles routes ajoutées au code (`/products`, `/visitors/sample`) renvoyaient `404 Not Found`, car les requêtes atteignaient en réalité l'ancien conteneur Docker (image construite avant l'ajout de ces routes), pas le serveur local à jour.
+**Contexte** : test des nouvelles routes de support dashboard (Jalon 9) après avoir laissé tourner le conteneur API du Jalon 8.
+**Application future** : avant de diagnostiquer un comportement API inattendu (route manquante, code obsolète) alors qu'un `docker compose up` a été utilisé plus tôt dans la session, vérifier `docker compose ps` en premier — un serveur local sur le même port perd silencieusement la course, sans message d'erreur de type "port déjà utilisé" observable côté client.
+
+## LRN-016 — `python -m package.module` requis pour les imports absolus dans un Dockerfile
+
+**Date** : 2026-08-19
+**Pattern observé** : `CMD ["python3", "dashboard/app.py"]` (Dockerfile.dashboard original) aurait cassé les imports du type `from dashboard.theme import ...` à l'intérieur même de `dashboard/app.py` — exécuté comme script direct, Python place le dossier du script (`dashboard/`) en tête de `sys.path`, pas `/app` (WORKDIR), donc le paquet `dashboard` lui-même n'est pas résoluble depuis l'intérieur.
+**Contexte** : écriture du Dockerfile.dashboard (Jalon 9) — repéré avant exécution en comparant avec le pattern déjà utilisé pour les scripts `src/*/train.py` (`python -m src.forecasting.train`, jamais `python src/forecasting/train.py`).
+**Application future** : dans tout Dockerfile CMD/ENTRYPOINT qui lance un module Python appartenant à un paquet avec des imports absolus internes (`from <paquet>.x import y`), toujours utiliser `python -m <paquet>.<module>`, jamais `python <chemin>/<module>.py` — même règle que pour les scripts locaux de ce projet.

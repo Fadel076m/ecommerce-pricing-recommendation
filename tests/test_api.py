@@ -120,3 +120,39 @@ def test_recommendations_unknown_visitor_falls_back_to_most_popular(client):
     body = response.json()
     assert body["is_cold_start_fallback"] is True
     assert len(body["recommendations"]) > 0
+
+
+# --- Routes support dashboard (Jalon 9) ---------------------------------------
+
+
+def test_kpi_summary(client):
+    response = client.get("/kpis/summary")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["revenue_total"] > 0
+    assert body["orders_total"] > 0
+    assert body["n_products"] > 0
+    assert body["n_customers"] > 0
+
+
+def test_kpi_inventory_respects_limit(client):
+    response = client.get("/kpis/inventory", params={"limit": 5})
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) <= 5
+    assert all(item["closing_stock"] >= 0 for item in body)
+
+
+def test_products_search(client):
+    response = client.get("/products", params={"limit": 5})
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) <= 5
+    assert all("product_id" in p and "product_name" in p for p in body)
+
+
+def test_visitors_sample(client):
+    response = client.get("/visitors/sample", params={"n": 5})
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body["visitor_ids"]) <= 5

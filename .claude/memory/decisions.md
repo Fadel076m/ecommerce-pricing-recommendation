@@ -19,6 +19,7 @@ project: ecommerce-pricing-recommendation
 | BDR-010 | 2026-08-19 | Pricing : élasticité estimée seulement si éligible (1057/4631 produits), fallback assumé -1,5 sinon, bornée à [-10,0] | actif |
 | BDR-011 | 2026-08-19 | Recommendation construite entièrement dans l'espace RetailRocket (visitor_id/item_id), pas UCI customer_id | actif |
 | BDR-012 | 2026-08-19 | API servie depuis des artefacts précalculés (Jalons 5-7), `requirements-api.txt` allégé pour le Dockerfile | actif |
+| BDR-013 | 2026-08-19 | API étendue avec 4 routes de support dashboard (KPIs/produits/visiteurs) plutôt que le dashboard recalcule quoi que ce soit | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -115,3 +116,11 @@ project: ecommerce-pricing-recommendation
 **Pourquoi** : réentraîner à chaque requête serait beaucoup trop lent (le pipeline recommendation prend plusieurs minutes) ; installer `requirements.txt` complet dans l'image API (pyspark/prophet/dash/scikit-learn/faiss/duckdb/boto3, dont l'API n'a besoin d'aucun) faisait échouer le build sur un timeout réseau et aurait produit une image inutilement lourde.
 **Alternatives considérées** : servir les modèles via MLflow Model Registry en le requêtant à chaque appel (rejeté — complexité et latence disproportionnées pour un prototype académique) ; réentraîner en tâche de fond planifiée (rejeté — hors périmètre du temps disponible, Airflow déjà sacrifié en priorité, BDR-004).
 **Statut** : actif. Conséquence directe : les recommandations ne couvrent que les visiteurs de l'échantillon évalué au Jalon 7 (5000/81318) — les autres retombent sur la baseline Most Popular côté API, documenté dans `docs/recommendation.md`/`docs/api.md`.
+
+## BDR-013 — API étendue pour le dashboard plutôt que le dashboard recalcule
+
+**Date** : 2026-08-19
+**Décision** : ajouter 4 routes à l'API (`GET /kpis/summary`, `GET /kpis/inventory`, `GET /products`, `GET /visitors/sample`) spécifiquement pour les besoins du dashboard (Page Executive, dropdowns de recherche produit/visiteur), plutôt que de laisser le dashboard interroger PostgreSQL directement.
+**Pourquoi** : `docs/api.md` (rédigé au Jalon 8) ne couvrait que les 5 routes "métier" (health/forecast/pricing/recommendations/simulate) — aucune route d'agrégation globale (CA/marge/commandes) ni de listing (produits, visiteurs) n'existait, alors que la Page Executive du Jalon 9 en a besoin. AGENTS.md §5 est explicite : "le dashboard ne doit pas dupliquer de logique métier : il consomme l'API, il ne recalcule rien" — la seule façon de respecter cette règle sans bloquer le Jalon 9 était d'étendre l'API.
+**Alternatives considérées** : laisser `dashboard/` se connecter directement à PostgreSQL pour ces agrégations simples (rejeté — viole explicitement AGENTS.md §5, même si l'agrégation SQL elle-même est simple ; le dashboard ne doit avoir aucune dépendance à PostgreSQL/SQLAlchemy) ; précalculer ces KPIs en fichier statique comme pour pricing/recommendation (rejeté — ce sont des agrégats globaux bon marché à calculer à la demande, pas besoin de les figer).
+**Statut** : actif.

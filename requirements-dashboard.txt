@@ -1,0 +1,7 @@
+# Dépendances runtime du dashboard Dash uniquement (docker/Dockerfile.dashboard).
+# Le dashboard ne fait qu'appeler l'API (AGENTS.md §5) : pas besoin de
+# pyspark/prophet/lightgbm/scikit-learn/faiss/duckdb/mlflow/psycopg2 ici.
+dash>=2.17
+plotly>=5.22
+requests>=2.31
+python-dotenv>=1.0

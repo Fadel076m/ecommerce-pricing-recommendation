@@ -36,3 +36,4 @@ plotly>=5.22
 # Utilitaires
 python-dotenv>=1.0
 pydantic>=2.7
+requests>=2.31       # dashboard -> API (AGENTS.md §5 : le dashboard ne recalcule rien)

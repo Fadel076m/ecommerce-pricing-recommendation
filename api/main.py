@@ -14,12 +14,16 @@ from fastapi import FastAPI, HTTPException
 from api.schemas import (
     ForecastResponse,
     HealthResponse,
+    InventoryRiskItem,
+    KpiSummaryResponse,
     PricingResponse,
     PricingSimulateRequest,
     PricingSimulateResponse,
+    ProductSummary,
     RecommendationResponse,
+    SampleVisitorsResponse,
 )
-from api.services import ForecastingService, PricingService, RecommendationService
+from api.services import ForecastingService, KpiService, PricingService, RecommendationService
 
 _services: dict = {}
 
@@ -29,6 +33,7 @@ async def lifespan(app: FastAPI):
     _services["forecasting"] = ForecastingService()
     _services["pricing"] = PricingService()
     _services["recommendation"] = RecommendationService()
+    _services["kpi"] = KpiService()
     yield
     _services.clear()
 
@@ -78,3 +83,27 @@ def simulate_pricing(request: PricingSimulateRequest):
 @app.get("/recommendations/{customer_id}", response_model=RecommendationResponse)
 def get_recommendations(customer_id: str):
     return _services["recommendation"].get_recommendations(customer_id)
+
+
+# --- Routes support dashboard (Jalon 9) : KPIs agrégés, listes pour dropdowns ---
+# AGENTS.md §5 : le dashboard consomme l'API, il ne recalcule aucune agrégation lui-même.
+
+
+@app.get("/kpis/summary", response_model=KpiSummaryResponse)
+def get_kpi_summary():
+    return _services["kpi"].get_summary()
+
+
+@app.get("/kpis/inventory", response_model=list[InventoryRiskItem])
+def get_kpi_inventory(limit: int = 20):
+    return _services["kpi"].get_inventory_risk(limit)
+
+
+@app.get("/products", response_model=list[ProductSummary])
+def list_products(search: str | None = None, limit: int = 20):
+    return _services["kpi"].get_products(search, limit)
+
+
+@app.get("/visitors/sample", response_model=SampleVisitorsResponse)
+def sample_visitors(n: int = 10):
+    return {"visitor_ids": _services["recommendation"].get_sample_visitor_ids(n)}

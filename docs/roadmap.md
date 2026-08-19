@@ -75,9 +75,9 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 - [x] Dockerfile API — `requirements-api.txt` allégé (pas de pyspark/prophet/dash inutiles), build + run vérifiés de bout en bout via `docker compose up api` (réseau, Postgres, volume `models/`)
 
 **Jalon 9 — Dashboard Dash**
-- [ ] Page Executive (KPIs globaux)
-- [ ] Page Forecast, Page Pricing, Page Recommendation, Page Inventory
-- [ ] Connexion à l'API (pas de logique métier dupliquée dans le dashboard)
+- [x] Page Executive (KPIs globaux) — `GET /kpis/summary` ajouté à l'API pour l'alimenter
+- [x] Page Forecast, Page Pricing, Page Recommendation, Page Inventory
+- [x] Connexion à l'API (pas de logique métier dupliquée dans le dashboard) — vérifié de bout en bout via `docker compose up dashboard` (réseau dashboard -> api -> Postgres), palette dataviz appliquée (skill dataviz)
 
 **Jalon 10 — Intégration**
 - [ ] Chaîne complète R2 → PostgreSQL → ML → MLflow → FastAPI → Dash fonctionnelle de bout en bout
