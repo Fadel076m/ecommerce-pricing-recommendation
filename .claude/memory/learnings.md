@@ -14,6 +14,7 @@ project: ecommerce-pricing-recommendation
 | LRN-005 | 2026-08-19 | `import great_expectations` (1.20.0) termine l'interpréteur en silence si une dépendance optionnelle (grpc, google.rpc...) manque |
 | LRN-006 | 2026-08-19 | Les colonnes `object` pandas à types mixtes (int + str) font planter `to_parquet` (pyarrow) — caster en `str` avant export |
 | LRN-007 | 2026-08-19 | Le `transactionid` RetailRocket n'est pas unique par ligne d'événement : plusieurs items d'un même panier le partagent |
+| LRN-008 | 2026-08-19 | MLflow imprime des emojis sur stdout qui font planter tout script Python sur console Windows (cp1252) — même après un run réussi |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -63,3 +64,10 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : dans `events.csv` (RetailRocket), un même `transactionid` (événement `transaction`) peut apparaître sur plusieurs lignes — un panier avec plusieurs articles achetés génère une ligne par item, toutes avec le même `transactionid`. L'utiliser comme identifiant unique de ligne (`event_id`) provoque une violation de contrainte `UNIQUE`/`PRIMARY KEY` au chargement en base (`psycopg2.errors.UniqueViolation`), qui n'apparaît qu'après avoir déjà inséré des centaines de milliers de lignes.
 **Contexte** : construction de `fact_web_events` (Jalon 3/4, `src/transformation/web_events.py`) — voir aussi `docs/data_dictionary.md`.
 **Application future** : pour un `event_id` garanti unique sur ce type de log d'événements, préférer un identifiant positionnel (index de ligne après tri stable) plutôt qu'une combinaison de colonnes métier, même quand une colonne "id" existe dans la source — vérifier son unicité réelle avant de s'y fier (`df[col].is_unique`, pas juste "ça s'appelle id").
+
+## LRN-008 — MLflow + console Windows (cp1252) = crash après un run réussi
+
+**Date** : 2026-08-19
+**Pattern observé** : `mlflow.start_run()` imprime sur stdout des messages contenant des emojis (🏃 pour le lien du run, 🧪 pour l'expérience) à la fin du `with` block. Sur une console Windows dont l'encodage par défaut est `cp1252` (pas UTF-8), `sys.stdout.write(...)` lève `UnicodeEncodeError` — le script plante avec un traceback qui pointe vers MLflow, alors que l'entraînement et le logging des métriques ont déjà réussi (visible dans les lignes de sortie juste avant le crash).
+**Contexte** : premier lancement de `src/forecasting/train.py` (Jalon 5) — se reproduira sur tout futur script Python qui utilise MLflow en console Windows (pricing, recommendation, Jalons 6-7).
+**Application future** : au tout début de tout script qui importe `mlflow` et tourne potentiellement sur console Windows, forcer l'encodage stdout/stderr en UTF-8 avant l'import (`sys.stdout.reconfigure(encoding="utf-8", errors="replace")` si `sys.platform == "win32"`). Si un script MLflow plante avec un `UnicodeEncodeError` pointant vers `_log_url`, ce n'est presque jamais un vrai échec du run — vérifier d'abord les lignes de sortie précédentes avant de re-déboguer la logique métier.

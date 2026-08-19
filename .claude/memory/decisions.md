@@ -15,6 +15,7 @@ project: ecommerce-pricing-recommendation
 | BDR-006 | 2026-08-19 | `great_expectations` retiré du projet, data quality en Pytest uniquement | actif |
 | BDR-007 | 2026-08-19 | `fact_inventory` = un instantané par produit, pas une série temporelle quotidienne | actif |
 | BDR-008 | 2026-08-19 | Lecture R2 en DuckDB via secret `TYPE s3` générique (endpoint explicite), pas `TYPE r2` | actif |
+| BDR-009 | 2026-08-19 | Forecasting : comparaison Baseline/Prophet sur la demande agrégée + LightGBM global par produit (pas un Prophet par produit) | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -79,3 +80,11 @@ project: ecommerce-pricing-recommendation
 **Pourquoi** : `TYPE r2` avec `ACCOUNT_ID` renvoie une erreur HTTP 404 sur `read_parquet('s3://bucket/...')` avec ce bucket, alors que le type `s3` générique avec un `ENDPOINT` explicite et `URL_STYLE 'path'` fonctionne immédiatement (testé avec duckdb 1.5.5). Cause exacte non investiguée plus loin (possible dérivation d'URL différente entre les deux types de secret) — retenir la solution qui marche plutôt que creuser, vu le temps disponible.
 **Alternatives considérées** : passer par boto3/pandas pour toute lecture R2 (rejeté — perd l'intérêt de DuckDB pour l'analyse SQL directe sur Parquet distant, exigé par le brief section 9).
 **Statut** : actif.
+
+## BDR-009 — Forecasting : comparaison sur l'agrégé, production en modèle global
+
+**Date** : 2026-08-19
+**Décision** : comparer Baseline Moving Average et Prophet uniquement sur la demande quotidienne **agrégée** (tous produits), et entraîner un **unique** modèle LightGBM "global" (panel produit × jour, `product_id` en feature catégorielle) pour servir `/forecast/{product_id}` pour n'importe lequel des ~4600 produits.
+**Pourquoi** : Prophet ne modélise qu'une série à la fois — entraîner un Prophet par produit (4600 modèles) était intraitable dans le temps du projet. Le pattern "modèle global" (un seul modèle, l'identité de la série en feature) est l'approche standard pour ce volume de séries et permet de répondre à l'API pour tout produit sans réentraînement par référence.
+**Alternatives considérées** : Prophet sur un échantillon de top-N produits (rejeté — n'aurait couvert qu'une fraction du catalogue pour l'API) ; un modèle LightGBM par produit (rejeté — même problème de scalabilité que Prophet, en pire).
+**Statut** : actif. Les deux résultats (agrégé vs par-produit) ne sont pas comparables entre eux — documenté explicitement dans `docs/forecasting.md` pour ne pas induire en erreur au moment du rapport/soutenance.

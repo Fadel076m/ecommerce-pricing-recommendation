@@ -11,9 +11,9 @@ data/sample/*.csv
 data/sample/*.parquet
 !data/sample/.gitkeep
 
-# Modèles et artefacts
-models/*.pkl
-models/*.joblib
+# Modèles et artefacts (AGENTS.md §6 : non versionnés)
+models/*
+!models/.gitkeep
 mlruns/
 mlflow.db
 

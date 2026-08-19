@@ -47,11 +47,11 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pas paralléliser en solo.
 
 **Jalon 5 — Forecasting**
-- [ ] Baseline Moving Average
-- [ ] Comparaison Prophet / LightGBM
-- [ ] Split temporel strict (jamais de random split)
-- [ ] Métriques MAE / RMSE / MAPE (attention MAPE si ventes proches de 0)
-- [ ] Log MLflow
+- [x] Baseline Moving Average
+- [x] Comparaison Prophet / LightGBM (Prophet vs baseline sur l'agrégé ; LightGBM global par produit pour l'API — granularités différentes, voir `docs/forecasting.md`)
+- [x] Split temporel strict (jamais de random split) — 30 derniers jours en test, testé (`tests/test_forecasting.py`)
+- [x] Métriques MAE / RMSE / MAPE (MAPE explose sur ventes proches de 0 comme anticipé — MAE/RMSE retenus comme référence, voir `docs/forecasting.md`)
+- [x] Log MLflow (expérience `forecasting`, 3 runs)
 
 **Jalon 6 — Pricing**
 - [ ] Estimation élasticité à partir de l'historique prix/demande
