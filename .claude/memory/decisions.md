@@ -13,6 +13,8 @@ project: ecommerce-pricing-recommendation
 | BDR-004 | 2026-08-19 | Airflow isolé dans `requirements-airflow.txt`, installé séparément avec contraintes officielles | actif |
 | BDR-005 | 2026-08-19 | venv Python 3.12 (pas 3.14) pour la compatibilité des wheels ML | actif |
 | BDR-006 | 2026-08-19 | `great_expectations` retiré du projet, data quality en Pytest uniquement | actif |
+| BDR-007 | 2026-08-19 | `fact_inventory` = un instantané par produit, pas une série temporelle quotidienne | actif |
+| BDR-008 | 2026-08-19 | Lecture R2 en DuckDB via secret `TYPE s3` générique (endpoint explicite), pas `TYPE r2` | actif |
 
 ## BDR-001 — ISM fait foi pour la technique, Gest Projet pour l'évaluation
 
@@ -60,4 +62,20 @@ project: ecommerce-pricing-recommendation
 **Décision** : ne pas utiliser `great_expectations` dans le projet ; toutes les règles de data quality (`docs/data_quality.md`) sont implémentées en assertions Pytest (`tests/test_data_quality.py`).
 **Pourquoi** : `import great_expectations` (v1.20.0) termine silencieusement l'interpréteur Python (`sys.exit(0)`, sans traceback) dès qu'une dépendance optionnelle (`grpc`, puis `google.rpc`...) est absente — un import en apparence anodin qui coupe tout le script qui l'utilise. AGENTS.md autorise explicitement "Great Expectations **ou** assertions Pytest" (§2) : Pytest est retenu comme seule option pour éviter cette fragilité, sans perte de couverture (9 tests passent, dont 3 d'intégration sur l'échantillon réel).
 **Alternatives considérées** : traquer et installer chaque dépendance optionnelle manquante une par une (rejeté — pas de garantie que la liste s'arrête, perte de temps) ; épingler une version antérieure de `great_expectations` (non testé, risque similaire).
+**Statut** : actif.
+
+## BDR-007 — `fact_inventory` : instantané par produit, pas de série temporelle quotidienne
+
+**Date** : 2026-08-19
+**Décision** : générer une seule ligne de stock synthétique par produit (`date_id` = dernière date observée dans `fact_sales`), plutôt qu'une ligne par produit et par jour.
+**Pourquoi** : le grain `(product_id, date_id)` documenté dans le brief suggère un historique quotidien complet, mais le générer pour ~4600 produits × ~740 jours (~3,4M lignes synthétiques) n'apporte rien de plus pour les cas d'usage MVP (risque de rupture/surstock au dashboard, section 50 étape 2) qu'un instantané courant, et coûte du temps de génération/chargement sur un projet de 6 jours. Documenté explicitement dans `docs/data_dictionary.md` pour ne pas être confondu avec un vrai historique.
+**Alternatives considérées** : générer un historique quotidien complet (rejeté — volumétrie et temps disproportionnés par rapport au gain) ; ne pas avoir de `date_id` du tout dans `fact_inventory` (rejeté — casse la jointure `dim_date` prévue par le modèle en étoile).
+**Statut** : actif — à révision si le forecasting (Jalon 5) a besoin d'un historique de stock quotidien réel.
+
+## BDR-008 — Lecture R2 en DuckDB via secret `TYPE s3` générique
+
+**Date** : 2026-08-19
+**Décision** : pour lire les fichiers R2 depuis DuckDB, utiliser `CREATE SECRET (TYPE s3, ENDPOINT '<compte>.r2.cloudflarestorage.com', URL_STYLE 'path', REGION 'auto', ...)` plutôt que le type dédié `TYPE r2` (qui accepte `ACCOUNT_ID` au lieu d'`ENDPOINT`).
+**Pourquoi** : `TYPE r2` avec `ACCOUNT_ID` renvoie une erreur HTTP 404 sur `read_parquet('s3://bucket/...')` avec ce bucket, alors que le type `s3` générique avec un `ENDPOINT` explicite et `URL_STYLE 'path'` fonctionne immédiatement (testé avec duckdb 1.5.5). Cause exacte non investiguée plus loin (possible dérivation d'URL différente entre les deux types de secret) — retenir la solution qui marche plutôt que creuser, vu le temps disponible.
+**Alternatives considérées** : passer par boto3/pandas pour toute lecture R2 (rejeté — perd l'intérêt de DuckDB pour l'analyse SQL directe sur Parquet distant, exigé par le brief section 9).
 **Statut** : actif.

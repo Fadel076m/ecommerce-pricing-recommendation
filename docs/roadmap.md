@@ -33,14 +33,14 @@ Chaque jalon doit se terminer par un commit git dédié et une mise à jour de l
 ## J2 — Jeudi 20/08 — Jalon 3 (Data Lake R2) + Jalon 4 (Data Warehouse)
 
 **Jalon 3 — Data Lake R2**
-- [ ] Bucket R2 créé, structure `raw/ processed/ features/`
-- [ ] `src/ingestion/` : scripts d'upload Parquet vers R2 (boto3, endpoint S3-compatible)
-- [ ] Vérification : fichiers uploadés, listés, lus et analysés depuis R2 (via DuckDB)
+- [x] Bucket R2 créé, structure `raw/ processed/` (`features/` réservé aux Jalons 5-7)
+- [x] `src/ingestion/` : scripts d'upload Parquet vers R2 (boto3, endpoint S3-compatible)
+- [x] Vérification : fichiers uploadés, listés, lus et analysés depuis R2 (via DuckDB) — `make verify-r2`
 
 **Jalon 4 — Data Warehouse**
-- [ ] DDL SQL (`dim_customer`, `dim_product`, `dim_date`, `dim_promotion`, `fact_sales`, `fact_inventory`, `fact_web_events`)
-- [ ] ETL processed → PostgreSQL
-- [ ] Vérification : CA, marge, commandes, panier moyen, stock calculables en SQL
+- [x] DDL SQL (`dim_customer`, `dim_product`, `dim_date`, `dim_promotion`, `fact_sales`, `fact_inventory`, `fact_web_events`) — `data/schemas/ddl.sql`
+- [x] ETL processed → PostgreSQL — `make warehouse`
+- [x] Vérification : CA, marge, commandes, panier moyen, stock calculables en SQL (36 975 commandes, CA 16 973 707,88, marge 3 499 564,12, panier moyen 459,06 — sous hypothèses des variables synthétiques cost_price/stock/promotion)
 
 ## J3 — Vendredi 21/08 — Jalon 5 (Forecasting) + Jalon 6 (Pricing) + Jalon 7 (Recommendation)
 

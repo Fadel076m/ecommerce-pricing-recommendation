@@ -70,10 +70,12 @@ Complémentaire possible (non prioritaire, Jalon 6+) : `Dunnhumby` fournit de vr
 
 ## fact_inventory
 
+> Simplification MVP assumée : un seul instantané de stock par produit (`date_id` = dernière date observée dans `fact_sales`), pas une série temporelle quotidienne complète — suffisant pour le calcul de risque de rupture/surstock du dashboard (use case 2), documenté explicitement pour ne pas être confondu avec un historique de stock réel.
+
 | Colonne | Type | Source | Signification | Transformation | Usage |
 |---|---|---|---|---|---|
 | product_id | string | Observé (référence à `dim_product`) | produit concerné | — | jointure |
-| date_id | int | Dérivé | référence date | — | jointure `dim_date` |
+| date_id | int | Dérivé | date de l'instantané (dernière date observée dans `fact_sales`) | — | jointure `dim_date` |
 | opening_stock | int | Synthétique (seed=42) | stock en début de période | `generate_stock_movement()`, calibré sur `avg_daily_sales` observé | KPI Stock, rupture/surstock |
 | stock_in | int | Synthétique (seed=42) | réapprovisionnement de la période | `generate_stock_movement()` | KPI Stock |
 | quantity_sold | int | Observé — agrégation de `fact_sales.quantity` par produit/date | quantité vendue sur la période | somme des ventes observées | cohérence stock, forecasting |

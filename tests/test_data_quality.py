@@ -15,7 +15,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from scripts.data_generator import (  # noqa: E402
+from src.transformation.star_schema import (  # noqa: E402
     RANDOM_SEED,
     generate_cost_price,
     generate_promotion,

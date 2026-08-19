@@ -12,6 +12,8 @@ project: ecommerce-pricing-recommendation
 | LRN-003 | 2026-08-19 | `commande \| tail -N` (sans `-f`) n'affiche rien avant l'EOF : ne pas conclure à un blocage sur cette seule base |
 | LRN-004 | 2026-08-19 | Un `pip install` peut échouer en fin de course sur un verrou fichier Windows si un process Python résiduel tourne encore |
 | LRN-005 | 2026-08-19 | `import great_expectations` (1.20.0) termine l'interpréteur en silence si une dépendance optionnelle (grpc, google.rpc...) manque |
+| LRN-006 | 2026-08-19 | Les colonnes `object` pandas à types mixtes (int + str) font planter `to_parquet` (pyarrow) — caster en `str` avant export |
+| LRN-007 | 2026-08-19 | Le `transactionid` RetailRocket n'est pas unique par ligne d'événement : plusieurs items d'un même panier le partagent |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -47,3 +49,17 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : `import great_expectations` (v1.20.0) provoque un `sys.exit(0)` silencieux (aucune exception, aucun traceback) dès qu'une dépendance optionnelle liée au télémétrie/doctest (`grpc`, puis `google.rpc` une fois `grpc` installé) est absente. Un script qui importe ce module en tête de fichier s'arrête net à cette ligne, sans message d'erreur exploitable au premier abord (juste "Skipping doctests: No module named 'X'" sur stderr).
 **Contexte** : smoke test de l'environnement Python après installation (Jalon 2) — voir BDR-006.
 **Application future** : si un script Python se termine silencieusement (code de sortie 0) sans exécuter la suite attendue, suspecter un import qui appelle `sys.exit()`/`os._exit()` en effet de bord, et bisecter les imports un par un plutôt que de chercher une exception qui n'existera pas. Pour ce projet : `great_expectations` n'est plus une dépendance (BDR-006), data quality en Pytest uniquement.
+
+## LRN-006 — Colonnes `object` à types mixtes -> `to_parquet` plante (pyarrow)
+
+**Date** : 2026-08-19
+**Pattern observé** : `online_retail_II.xlsx` a des colonnes (`Invoice`/`StockCode`/`Description`) où pandas infère `dtype=object` mais où les valeurs réelles mélangent `int` et `str` sur les deux feuilles du fichier (ex. `Description` majoritairement du texte mais avec quelques valeurs numériques résiduelles). `DataFrame.to_parquet()` échoue alors avec `pyarrow.lib.ArrowInvalid`/`ArrowTypeError` ("Could not convert ... tried to convert to int64" ou "Expected bytes, got a 'int' object"), sans indiquer clairement quelle ligne pose problème.
+**Contexte** : upload du layer `raw/` vers R2 (Jalon 3) — la donnée UCI brute n'a jamais ce problème pour pandas seul (il affiche juste `dtype=object`), il n'apparaît qu'au moment de la conversion Arrow.
+**Application future** : avant tout `to_parquet()` sur un DataFrame venant d'une source externe non typée (xlsx/csv), caster explicitement toutes les colonnes `object` en `str` (`df[col].astype(str)` pour `df.select_dtypes(include="object").columns`) — plus fiable que de corriger colonne par colonne après coup.
+
+## LRN-007 — `transactionid` RetailRocket n'est pas une clé de ligne unique
+
+**Date** : 2026-08-19
+**Pattern observé** : dans `events.csv` (RetailRocket), un même `transactionid` (événement `transaction`) peut apparaître sur plusieurs lignes — un panier avec plusieurs articles achetés génère une ligne par item, toutes avec le même `transactionid`. L'utiliser comme identifiant unique de ligne (`event_id`) provoque une violation de contrainte `UNIQUE`/`PRIMARY KEY` au chargement en base (`psycopg2.errors.UniqueViolation`), qui n'apparaît qu'après avoir déjà inséré des centaines de milliers de lignes.
+**Contexte** : construction de `fact_web_events` (Jalon 3/4, `src/transformation/web_events.py`) — voir aussi `docs/data_dictionary.md`.
+**Application future** : pour un `event_id` garanti unique sur ce type de log d'événements, préférer un identifiant positionnel (index de ligne après tri stable) plutôt qu'une combinaison de colonnes métier, même quand une colonne "id" existe dans la source — vérifier son unicité réelle avant de s'y fier (`df[col].is_unique`, pas juste "ça s'appelle id").
