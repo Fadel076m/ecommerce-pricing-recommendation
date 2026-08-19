@@ -23,6 +23,7 @@ project: ecommerce-pricing-recommendation
 | LRN-014 | 2026-08-19 | Un `pip install` dans un build Docker peut timeout sur un réseau instable même avec peu de paquets — `--timeout`/`--retries` généreux évite un échec évitable |
 | LRN-015 | 2026-08-19 | Un serveur local et un conteneur Docker peuvent se disputer le même port sans erreur visible — vérifier `docker compose ps` avant de suspecter le code |
 | LRN-016 | 2026-08-19 | `python script.py` (au lieu de `python -m package.module`) casse les imports absolus `from package...` dans un Dockerfile CMD |
+| LRN-017 | 2026-08-19 | Le texte visible du dashboard ne doit jamais citer les fichiers de doc interne ni mentionner "projet académique" — retour utilisateur après le premier jet |
 
 ## LRN-001 — Fichiers volumineux à ne jamais charger avec pandas brut
 
@@ -135,3 +136,10 @@ project: ecommerce-pricing-recommendation
 **Pattern observé** : `CMD ["python3", "dashboard/app.py"]` (Dockerfile.dashboard original) aurait cassé les imports du type `from dashboard.theme import ...` à l'intérieur même de `dashboard/app.py` — exécuté comme script direct, Python place le dossier du script (`dashboard/`) en tête de `sys.path`, pas `/app` (WORKDIR), donc le paquet `dashboard` lui-même n'est pas résoluble depuis l'intérieur.
 **Contexte** : écriture du Dockerfile.dashboard (Jalon 9) — repéré avant exécution en comparant avec le pattern déjà utilisé pour les scripts `src/*/train.py` (`python -m src.forecasting.train`, jamais `python src/forecasting/train.py`).
 **Application future** : dans tout Dockerfile CMD/ENTRYPOINT qui lance un module Python appartenant à un paquet avec des imports absolus internes (`from <paquet>.x import y`), toujours utiliser `python -m <paquet>.<module>`, jamais `python <chemin>/<module>.py` — même règle que pour les scripts locaux de ce projet.
+
+## LRN-017 — Ne jamais exposer la documentation interne dans le texte du dashboard
+
+**Date** : 2026-08-19
+**Pattern observé** : la première version des pages du dashboard (bannières de disclaimer notamment) citait directement des chemins de fichiers internes ("cf. docs/data_dictionary.md", "seed=42", "AGENTS.md §4") et mentionnait explicitement "prototype académique" dans le pied de page — approprié pour la documentation technique (`docs/*.md`), mais pas pour une interface destinée à être montrée comme un produit. L'utilisateur a demandé un design "digne de ce nom", inspiré de dashboards SaaS réels (sidebar, cartes colorées, icônes), et l'a explicitement signalé.
+**Contexte** : refonte visuelle du dashboard (Jalon 9, après le premier jet).
+**Application future** : dans tout composant destiné à l'affichage utilisateur final (dashboard, futurs écrans front), garder les avertissements de prudence métier en langage naturel généraliste ("estimation basée sur l'historique", "sensibilité au prix mesurée sur cet historique") sans jamais nommer un fichier de doc, une règle interne (AGENTS.md, seed=42) ni le statut "académique/prototype" du projet — ces réserves techniques restent dans `docs/*.md` et `.claude/memory/`, jamais dans l'UI. Le design doit être traité comme un livrable produit à part entière, pas une simple démonstration fonctionnelle.

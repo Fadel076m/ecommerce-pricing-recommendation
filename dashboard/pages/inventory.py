@@ -1,26 +1,19 @@
-"""Page Inventory (Jalon 9) : risque de rupture de stock, via l'API.
-
-Stock synthétique (Jalon 2, seed=42) — cf. docs/data_dictionary.md. Jours de
-stock estimés = closing_stock / vente_moyenne_quotidienne observée."""
+"""Page Stock : produits à risque de rupture."""
 import dash
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc, html
 
 from dashboard.api_client import get_kpi_inventory
-from dashboard.components import disclaimer_banner, empty_state, page_title, status_badge
-from dashboard.theme import BORDER, PLOTLY_LAYOUT, STATUS, SURFACE, TEXT_MUTED, TEXT_PRIMARY, stock_risk_status
+from dashboard.components import card, empty_state, page_header, status_badge
+from dashboard.theme import BORDER, PLOTLY_LAYOUT, STATUS, TEXT_MUTED, TEXT_PRIMARY, stock_risk_status
 
-dash.register_page(__name__, path="/inventory", name="Inventory")
+dash.register_page(__name__, path="/inventory", name="Stock")
 
 STATUS_LABELS = {"critical": "Rupture imminente", "serious": "Risque élevé", "warning": "À surveiller", "good": "Stock sain"}
 
 layout = html.Div(
     [
-        page_title("Inventory — risque de rupture de stock"),
-        disclaimer_banner(
-            "Stock généré synthétiquement (seed=42, cf. docs/data_dictionary.md) — instantané, pas une série "
-            "temporelle quotidienne réelle (voir docs/data_dictionary.md, section fact_inventory)."
-        ),
+        page_header("Suivi du stock", "Identifiez rapidement les produits à réapprovisionner en priorité."),
         dcc.Loading(html.Div(id="inventory-content")),
     ]
 )
@@ -42,35 +35,37 @@ def load_inventory(_):
                 y=[f"{item['product_id']} — {item['product_name'][:28]}" for item in items][::-1],
                 orientation="h",
                 marker_color=[STATUS[item["status"]] for item in items][::-1],
-                hovertemplate="%{y}<br>%{x} jours de stock estimés<extra></extra>",
+                marker_line_width=0,
+                hovertemplate="%{y}<br>%{x} jours de stock restants<extra></extra>",
             )
         ]
     )
-    fig.update_layout(**PLOTLY_LAYOUT, title="Produits les plus à risque (jours de stock estimés)", showlegend=False, height=max(360, 24 * len(items)))
+    fig.update_layout(**PLOTLY_LAYOUT, title="Produits les plus urgents à réapprovisionner", showlegend=False, height=max(360, 26 * len(items)))
 
     rows = [
         html.Tr(
             [
-                html.Td(item["product_id"], style={"padding": "8px 12px", "color": TEXT_PRIMARY, "fontWeight": 600}),
-                html.Td(item["product_name"], style={"padding": "8px 12px", "color": TEXT_PRIMARY}),
-                html.Td(str(item["closing_stock"]), style={"padding": "8px 12px", "color": TEXT_MUTED}),
-                html.Td(f"{item['days_of_stock_estimated']:.1f} j" if item["days_of_stock_estimated"] is not None else "—", style={"padding": "8px 12px", "color": TEXT_MUTED}),
-                html.Td(status_badge(item["status"], STATUS_LABELS[item["status"]]), style={"padding": "8px 12px"}),
-            ]
+                html.Td(item["product_id"], style={"padding": "12px 16px", "color": TEXT_PRIMARY, "fontWeight": 600}),
+                html.Td(item["product_name"], style={"padding": "12px 16px", "color": TEXT_PRIMARY}),
+                html.Td(str(item["closing_stock"]), style={"padding": "12px 16px", "color": TEXT_MUTED}),
+                html.Td(f"{item['days_of_stock_estimated']:.1f} j" if item["days_of_stock_estimated"] is not None else "—", style={"padding": "12px 16px", "color": TEXT_MUTED}),
+                html.Td(status_badge(item["status"], STATUS_LABELS[item["status"]]), style={"padding": "12px 16px"}),
+            ],
+            style={"borderTop": f"1px solid {BORDER}"},
         )
         for item in items
     ]
     table = html.Table(
-        style={"width": "100%", "borderCollapse": "collapse", "backgroundColor": SURFACE, "border": f"1px solid {BORDER}", "borderRadius": "8px", "marginTop": "20px"},
+        style={"width": "100%", "borderCollapse": "collapse"},
         children=[
             html.Thead(
                 html.Tr(
                     [
-                        html.Th("Produit", style={"textAlign": "left", "padding": "8px 12px"}),
-                        html.Th("Nom", style={"textAlign": "left", "padding": "8px 12px"}),
-                        html.Th("Stock", style={"textAlign": "left", "padding": "8px 12px"}),
-                        html.Th("Jours de stock", style={"textAlign": "left", "padding": "8px 12px"}),
-                        html.Th("Statut", style={"textAlign": "left", "padding": "8px 12px"}),
+                        html.Th("Produit", style={"textAlign": "left", "padding": "0 16px 10px", "color": TEXT_MUTED, "fontSize": "12px", "fontWeight": 500}),
+                        html.Th("Nom", style={"textAlign": "left", "padding": "0 16px 10px", "color": TEXT_MUTED, "fontSize": "12px", "fontWeight": 500}),
+                        html.Th("Stock", style={"textAlign": "left", "padding": "0 16px 10px", "color": TEXT_MUTED, "fontSize": "12px", "fontWeight": 500}),
+                        html.Th("Autonomie", style={"textAlign": "left", "padding": "0 16px 10px", "color": TEXT_MUTED, "fontSize": "12px", "fontWeight": 500}),
+                        html.Th("Statut", style={"textAlign": "left", "padding": "0 16px 10px", "color": TEXT_MUTED, "fontSize": "12px", "fontWeight": 500}),
                     ]
                 )
             ),
@@ -78,4 +73,10 @@ def load_inventory(_):
         ],
     )
 
-    return html.Div([dcc.Graph(figure=fig, config={"displayModeBar": False}), table])
+    return html.Div(
+        [
+            card(dcc.Graph(figure=fig, config={"displayModeBar": False})),
+            html.Div(style={"height": "24px"}),
+            card(table, padding="20px 8px"),
+        ]
+    )
