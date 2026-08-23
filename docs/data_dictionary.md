@@ -83,18 +83,20 @@ Complémentaire possible (non prioritaire, Jalon 6+) : `Dunnhumby` fournit de vr
 
 ## fact_web_events
 
+Schéma tel qu'implémenté (`src/transformation/web_events.py`, `data/schemas/ddl.sql`) — sans clé étrangère vers `dim_customer`/`dim_product` (voir note ci-dessous).
+
 | Colonne | Type | Source | Signification | Transformation | Usage |
 |---|---|---|---|---|---|
-| event_id | string | Observé — RetailRocket (`transactionid` quand présent, sinon généré depuis `timestamp`+`visitorid`+`itemid`) | identifiant événement | — | clé technique |
-| customer_id | string | Observé — RetailRocket (`visitorid`) | référence visiteur | renommage, anonymisé par l'éditeur de la source (cf. `docs/rgpd.md`) | jointure `dim_customer` — **note : `visitorid` RetailRocket et `customer_id` UCI sont des espaces d'identifiants distincts, jamais fusionnés directement** |
-| product_id | string | Observé — RetailRocket (`itemid`) | référence produit consulté | — | jointure — **même note : `itemid` RetailRocket ≠ `StockCode` UCI, espaces distincts** |
-| session_id | string | Dérivé — reconstruit à partir de `visitorid` + fenêtre temporelle (RetailRocket ne fournit pas de `session_id` explicite) | session de navigation | règle de découpage à définir en Jalon 3 (ex. inactivité > 30 min = nouvelle session) | recommendation collaborative |
-| event_type | string | Observé — RetailRocket (`event` : view / addtocart / transaction) | type d'événement | renommage vers la nomenclature du brief (`view`, `add_to_cart`, `purchase`) | recommendation collaborative |
-| timestamp | datetime | Observé — RetailRocket (`timestamp`, epoch ms) | horodatage de l'événement | conversion epoch ms → datetime | split temporel (forecasting/recommendation) |
+| event_id | string | Dérivé | identifiant événement | généré positionnellement (`"EVT_" + index`) au chargement batch — `transactionid` RetailRocket n'est **pas** utilisable tel quel (un même `transactionid` couvre plusieurs lignes/items d'un même panier) ; le streaming simulé (Kafka, Jalon 10) utilise un préfixe distinct `STREAM_EVT_` pour ne jamais entrer en collision (cf. `docs/architecture.md`) | clé technique (PK) |
+| visitor_id | string | Observé — RetailRocket (`visitorid`) | référence visiteur | renommage, anonymisé par l'éditeur de la source (cf. `docs/rgpd.md`) | filtrage/agrégation — **note : `visitorid` RetailRocket et `customer_id` UCI sont des espaces d'identifiants distincts, jamais fusionnés directement, pas de clé étrangère commune** |
+| item_id | string | Observé — RetailRocket (`itemid`) | référence produit consulté | renommage | filtrage/agrégation — **même note : `itemid` RetailRocket ≠ `product_id` UCI (`StockCode`), espaces distincts** |
+| session_id | string | Dérivé — reconstruit à partir de `visitor_id` + fenêtre temporelle (RetailRocket ne fournit pas de `session_id` explicite) | session de navigation | découpage par inactivité : plus de 30 minutes sans événement pour un même visiteur = nouvelle session (`SESSION_GAP_MINUTES`) | recommendation collaborative |
+| event_type | string | Observé — RetailRocket (`event` : view / addtocart / transaction) | type d'événement | renommage vers la nomenclature du brief (`view`, `add_to_cart`, `purchase`) | pondération recommendation (`view`=1, `add_to_cart`=3, `purchase`=5) |
+| event_time | datetime | Observé — RetailRocket (`timestamp`, epoch ms) | horodatage de l'événement | conversion epoch ms → datetime | split temporel strict (recommendation, cf. `docs/recommendation.md`) |
 
 ## Note sur les espaces d'identifiants
 
-Rappel explicite : les `customer_id`/`product_id` de `fact_sales` (UCI) et `fact_web_events` (RetailRocket) ne référencent **pas** les mêmes individus/produits réels — ce sont deux sources indépendantes avec des identifiants propres. Elles ne sont jamais fusionnées par identifiant direct ; chaque table du modèle en étoile reste rattachée à sa source d'origine, et les usages cross-source (ex. recommendation hybride) passent par des features agrégées, jamais par une jointure `customer_id = visitorid`.
+Rappel explicite : le `customer_id`/`product_id` de `fact_sales` (UCI) et le `visitor_id`/`item_id` de `fact_web_events` (RetailRocket) ne référencent **pas** les mêmes individus/produits réels — ce sont deux sources indépendantes avec des identifiants propres. Elles ne sont jamais fusionnées par identifiant direct ; `fact_web_events` n'a aucune clé étrangère vers `dim_customer`/`dim_product` (cf. `data/schemas/ddl.sql`), et les usages cross-source (ex. recommendation hybride) passent par des features agrégées, jamais par une jointure `customer_id = visitor_id`.
 
 ## Note sur l'ingestion batch + streaming de fact_web_events
 
