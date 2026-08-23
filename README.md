@@ -45,8 +45,19 @@ make forecast pricing recommend   # entraîne et évalue les 3 moteurs, logge da
 make api                     # API FastAPI sur :8000 (Swagger sur /docs)
 make dashboard                # Dashboard Dash sur :8050
 make test                     # suite de tests Pytest
-make memory                   # affiche les derniers commits + dernière entrée du journal de session
 ```
+
+## Streaming simulé (Kafka)
+
+En plus du chargement batch ci-dessus, une démonstration de streaming simulé montre l'arrivée continue d'événements de navigation dans le Data Warehouse (topic Kafka → `fact_web_events`). Optionnelle, indépendante de `make demo` (ne démarre jamais automatiquement) :
+
+```bash
+make streaming-up                    # démarre Kafka (nécessite Postgres déjà démarré : make demo ou make docker-up)
+make streaming-consume &              # laisse tourner (s'arrête seul après 15s d'inactivité)
+make streaming-produce                # rejoue 2000 événements échantillon, un par ~0,2s
+```
+
+Détail technique dans `docs/architecture.md`, section Streaming simulé.
 
 ## Documentation
 

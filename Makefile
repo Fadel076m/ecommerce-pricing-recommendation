@@ -1,4 +1,4 @@
-.PHONY: setup demo ingest verify-r2 warehouse quality forecast pricing recommend api dashboard test docker-up docker-down
+.PHONY: setup demo ingest verify-r2 warehouse quality forecast pricing recommend api dashboard test docker-up docker-down streaming-up streaming-produce streaming-consume streaming-down
 
 setup:
 	@command -v uv >/dev/null 2>&1 && uv venv .venv && . .venv/bin/activate && uv pip install -r requirements.txt || \
@@ -51,3 +51,18 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+# Streaming simulé (Kafka, Jalon 10) : démonstration séparée de `make demo`,
+# nécessite Postgres démarré (make docker-up ou make demo au préalable).
+# Voir README.md et docs/architecture.md, section Streaming simulé.
+streaming-up:
+	docker compose --profile streaming up -d kafka
+
+streaming-produce:
+	python3 -m src.streaming.producer
+
+streaming-consume:
+	python3 -m src.streaming.consumer
+
+streaming-down:
+	docker compose --profile streaming stop kafka

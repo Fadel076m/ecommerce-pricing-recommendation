@@ -95,3 +95,9 @@ Complémentaire possible (non prioritaire, Jalon 6+) : `Dunnhumby` fournit de vr
 ## Note sur les espaces d'identifiants
 
 Rappel explicite : les `customer_id`/`product_id` de `fact_sales` (UCI) et `fact_web_events` (RetailRocket) ne référencent **pas** les mêmes individus/produits réels — ce sont deux sources indépendantes avec des identifiants propres. Elles ne sont jamais fusionnées par identifiant direct ; chaque table du modèle en étoile reste rattachée à sa source d'origine, et les usages cross-source (ex. recommendation hybride) passent par des features agrégées, jamais par une jointure `customer_id = visitorid`.
+
+## Note sur l'ingestion batch + streaming de fact_web_events
+
+`fact_web_events` est alimentée par deux chemins qui écrivent dans la même table (Jalon 10) :
+- **Batch** (historique complet) : `src/transformation/web_events.py`, `event_id` préfixé `EVT_`.
+- **Streaming simulé** (Kafka, démonstration) : `src/streaming/producer.py` rejoue un échantillon versionné (`data/sample/fact_web_events_sample.parquet`) sur un topic Kafka, `src/streaming/consumer.py` insère chaque événement au fil de l'eau, `event_id` préfixé `STREAM_EVT_` — préfixe distinct pour ne jamais entrer en collision avec la clé primaire du batch. Détail dans `docs/architecture.md`.

@@ -15,9 +15,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.transformation.star_schema import RANDOM_SEED, build_star_schema  # noqa: E402
+from src.transformation.web_events import build_fact_web_events  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SAMPLE_DIR = REPO_ROOT / "data" / "sample"
+
+# Échantillon rejoué par le producteur Kafka de démonstration (src/streaming/producer.py) :
+# suffisamment petit pour être versionné, indépendant de data/raw_local/ non versionné.
+WEB_EVENTS_SAMPLE_N = 2000
 
 # Taille de l'échantillon exporté (pas le dataset processed complet, qui
 # relève du Jalon 3 Data Lake / Jalon 4 Data Warehouse).
@@ -47,9 +52,19 @@ def export_sample(fact_sales, dim_product, fact_inventory, dim_promotion):
     print(f"Échantillon exporté dans {SAMPLE_DIR} : {len(fact_sales_sample)} lignes fact_sales, {len(sample_products)} produits.")
 
 
+def export_web_events_sample(fact_web_events):
+    SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
+    sample = fact_web_events.sample(
+        n=min(WEB_EVENTS_SAMPLE_N, len(fact_web_events)), random_state=RANDOM_SEED
+    ).sort_values("event_time").reset_index(drop=True)
+    sample.to_parquet(SAMPLE_DIR / "fact_web_events_sample.parquet", index=False)
+    print(f"Échantillon exporté dans {SAMPLE_DIR} : {len(sample)} lignes fact_web_events (rejouées par le producteur Kafka de démonstration).")
+
+
 def main():
     tables = build_star_schema()
     export_sample(tables["fact_sales"], tables["dim_product"], tables["fact_inventory"], tables["dim_promotion"])
+    export_web_events_sample(build_fact_web_events())
 
 
 if __name__ == "__main__":
