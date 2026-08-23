@@ -82,7 +82,7 @@ Journée la plus chargée : les trois moteurs ML. Travailler dans l'ordre, ne pa
 **Jalon 10 — Intégration**
 - [x] Chaîne complète R2 → PostgreSQL → ML → MLflow → FastAPI → Dash fonctionnelle de bout en bout — vérifié après `docker compose down && docker compose up -d --build` complet (redémarrage à froid, volumes Postgres persistés)
 - [x] Docker Compose complet (API + Dashboard + Postgres + MLflow) — les 4 services démarrent et communiquent correctement sur le réseau interne
-- [x] Tests pytest (data quality, API, pricing, recommendation, transformations) — 64 tests, dont 35 tournent sans données locales (simulé en écartant temporairement data/raw_local, models/, data/sample/ — 35 passed, 29 skipped proprement, 0 échec)
+- [x] Tests pytest (data quality, API, pricing, recommendation, transformations, streaming) — 68 tests (64 + 4 streaming ajoutés lors du Jalon Kafka), dont 35 tournent sans données locales (simulé en écartant temporairement data/raw_local, models/, data/sample/ — 35 passed, 29 skipped proprement, 0 échec)
 - [x] GitHub Actions CI (tests + build) — bug corrigé : le workflow ne se déclenchait que sur `main`, jamais utilisé (le repo n'a que `master`) ; job `build` ajouté (matrice api/dashboard, Dockerfiles allégés Jalon 8/9)
 - [x] Kafka (streaming simulé) — profil Docker Compose séparé (`streaming`), producteur/consommateur Python (`src/streaming/`), vérifié de bout en bout le 23/08 (20 événements produits → consommés → insérés dans `fact_web_events` sans perte ni doublon). Voir `docs/architecture.md`, section Streaming simulé
 - [ ] Airflow **seulement si le temps le permet** — ne jamais le prioriser au détriment des 3 modèles ou du dashboard (règle explicite du brief, section 29.8) — volontairement non traité faute de temps
